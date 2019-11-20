@@ -13,18 +13,18 @@ diff test.txt download-ready.txt >> difference.txt
 
 if [ -s difference.txt ]
 then
-	echo "you have made changes to the files..."
+	echo "You have made changes to the files..."
 	echo
-	echo "saving the changes to the cloud..."
+	echo "Saving your changes to the Cloud..."
 	echo
 
 	git add .
-	git commit -m "automatically making commit"
+	git commit -m "Automatically making commit for $userName"
 	git push >> push-info.txt
 
-	echo "changes saved to the cloud"
+	echo "Changes saved to the cloud"
 	echo
-	echo "downloading files from the cloud..."
+	echo "Downloading files from the cloud..."
 	echo
 
 	echo >> pull-history.txt
@@ -35,12 +35,12 @@ then
 	git commit -m "updating pull history"
 	git push >> push-info.txt
 
-	echo "all files are up to date with the cloud"
+	echo "All files up to date with the Cloud."
 	echo
 else
-	echo "you have made no changes to the files"
+	echo "You have made no changes to the files."
 	echo 
-	echo "downloading files from the cloud..."
+	echo "Downloading files from the cloud..."
 	echo
 
 	echo >> pull-history.txt
@@ -51,7 +51,7 @@ else
 	git commit -m "updating pull history"
 	git push >> push-info.txt	
 
-	echo "all the files are up to date with the cloud"
+	echo "All files up to date with the Cloud."
 	echo
 fi
 
