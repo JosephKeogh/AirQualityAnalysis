@@ -46,7 +46,7 @@ then
 
 	# now that the user's changes have been saved pull from the repository and store history
 	echo >> pull-history.txt
-	echo $now >> pull-history.txt
+	echo "$now" >> pull-history.txt
 	echo $userName > pull-history.txt
 	git pull >> pull-history.txt
 
