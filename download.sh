@@ -68,7 +68,7 @@ else
 	# put the user's name and time in the pull history
 	echo >> pull-history.txt
 	echo $now >> pull-history.txt
-	echo $userName > pull-history.txt
+	echo $userName >> pull-history.txt
 	git pull >> pull-history.txt
 
 	# store the pull history changes in the repository
