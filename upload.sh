@@ -33,10 +33,8 @@ echo
 	# store the changes to the push history in the repository
 	git add . >> trash.txt
 	git commit -m "updating push history" >> trash.txt
-	git push >> trash.txt
+	git push --quiet >> trash.txt
 	
-rm difference.txt
-rm test.txt
 rm trash.txt
 
 echo Finished
