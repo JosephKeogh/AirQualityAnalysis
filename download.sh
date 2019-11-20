@@ -1,6 +1,6 @@
 #!/bin/bash
 
->> test.txt
+> test.txt
 
 git status >> test.txt
 
@@ -13,4 +13,4 @@ else
 	echo "the files are NOT different"
 fi
 
->> difference.txt
+> difference.txt
