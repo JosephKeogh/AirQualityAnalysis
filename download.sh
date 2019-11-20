@@ -55,7 +55,7 @@ else
 	echo
 fi
 
-rm push-info.txt
+
 rm difference.txt
 rm test.txt
 
