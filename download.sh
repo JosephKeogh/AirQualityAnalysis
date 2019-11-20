@@ -39,7 +39,7 @@ then
 	echo
 else
 	echo "you have made no changes to the files"
-	echo .
+	echo 
 	echo "downloading files from the cloud..."
 	echo
 
