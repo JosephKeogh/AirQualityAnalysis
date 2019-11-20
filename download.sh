@@ -32,11 +32,13 @@ then
 	echo "$userName" >> push-history.txt
 
 	# push the user's changes and store info
+	echo A message from GitHub...
 	git add . >> push-history.txt
 	git commit -m "Automatically making commit for $userName" >> push-history.txt
 	git push >> push-history.txt
 
 	# message to user
+	echo
 	echo "Changes saved to the Cloud."
 	echo
 	echo "Downloading files from the Cloud..."
