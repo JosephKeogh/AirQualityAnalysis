@@ -17,7 +17,7 @@ then
 
 	git add .
 	git commit -m "automatically making commit"
-	git push
+	git push > push-info.txt
 
 	echo "changes saved to the cloud"
 	echo "downloading files from the cloud..."
@@ -28,7 +28,7 @@ then
 
 	git add .
 	git commit -m "updating pull history"
-	git push
+	git push > push-info.txt
 
 	echo "all files are up to date with the cloud"
 else
@@ -41,10 +41,11 @@ else
 
 	git add .
 	git commit -m "updating pull history"
-	git push	
+	git push > push-info.txt	
 
 	echo "all the files are up to date with the cloud"
 fi
 
 > difference.txt
 > test.txt
+rm push-info.txt
