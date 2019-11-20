@@ -49,9 +49,12 @@ then
 	git pull >> pull-history.txt
 
 	# store the changes to the pull and push history in the repository
+	echo Ignore the error message below.
+	echo
 	git add . >> trash.txt
-	git commit -m "updating pull and push history" >> trash.txt
-	git push >> trash.txt
+	echo
+	git commit --quiet -m "updating pull and push history" >> trash.txt
+	git push --quiet >> trash.txt
 
 	# message to user
 	echo "All files up to date with the Cloud."
@@ -72,9 +75,12 @@ else
 	git pull >> pull-history.txt
 
 	# store the pull history changes in the repository
+	echo Ignore the error message below.
+	echo
 	git add . >> trash.txt
-	git commit -m "updating pull history" >> trash.txt
-	git push >> trash.txt
+	echo
+	git commit --quiet -m "updating pull history" >> trash.txt
+	git push --quiet >> trash.txt
 
 	# message to user
 	echo "All files up to date with the Cloud."

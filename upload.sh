@@ -23,7 +23,9 @@ echo
 	echo "$userName" >> push-history.txt
 
 	# push the user's changes and store info
+	echo Ignore the error message below.
 	git add . >> push-history.txt
+	echo
 	git commit --quiet -m "Automatically making commit for $userName" >> push-history.txt
 	git push --quiet >> push-history.txt
 
@@ -31,7 +33,10 @@ echo
 	echo "Changes saved to the Cloud."
 	
 	# store the changes to the push history in the repository
+	echo Ignore the error message below.
+	echo
 	git add . >> trash.txt
+	echo
 	git commit --quiet -m "updating push history" >> trash.txt
 	git push --quiet >> trash.txt
 	
