@@ -1,7 +1,5 @@
 #!/bin/bash
 
-> test.txt
-
 git status >> test.txt
 
 diff test.txt download-ready.txt >> difference.txt
@@ -14,3 +12,4 @@ else
 fi
 
 > difference.txt
+> test.txt
