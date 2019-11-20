@@ -7,6 +7,10 @@ output:
   html_document: default
 ---
 
+```{r}
+a <- sin(0)
+```
+
 ```{r setup, include=FALSE}
 require("knitr")
 datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/AirQualityData"
