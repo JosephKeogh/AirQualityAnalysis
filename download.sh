@@ -90,4 +90,4 @@ rm difference.txt
 rm test.txt
 rm trash.txt
 
-echo Finished
+echo Finished!

@@ -42,4 +42,4 @@ echo
 	
 rm trash.txt
 
-echo Finished
+echo Finished!
