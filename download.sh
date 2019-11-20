@@ -4,6 +4,8 @@ echo "Please enter your name..."
 
 read userName
 
+now=`date`
+
 echo Thank You $userName
 echo
 
@@ -17,6 +19,10 @@ then
 	echo
 	echo "Saving your changes to the Cloud..."
 	echo
+	
+	echo > push-info.txt
+	echo "$now" > push-info.txt
+	echo "$userName" > push-info.txt
 
 	git add . > push-info.txt
 	git commit -m "Automatically making commit for $userName"
@@ -28,7 +34,8 @@ then
 	echo
 
 	echo > pull-history.txt
-	echo $userName >> pull-history.txt
+	echo $now > pull-history.txt
+	echo $userName > pull-history.txt
 	git pull > pull-history.txt
 
 	git add . > push-info.txt
