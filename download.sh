@@ -50,7 +50,6 @@ then
 
 	# store the changes to the pull and push history in the repository
 	echo Ignore the error message below.
-	echo
 	git add . >> trash.txt
 	echo
 	git commit --quiet -m "updating pull and push history" >> trash.txt
@@ -76,7 +75,6 @@ else
 
 	# store the pull history changes in the repository
 	echo Ignore the error message below.
-	echo
 	git add . >> trash.txt
 	echo
 	git commit --quiet -m "updating pull history" >> trash.txt

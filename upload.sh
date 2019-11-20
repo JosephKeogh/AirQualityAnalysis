@@ -31,10 +31,10 @@ echo
 
 	# message to user
 	echo "Changes saved to the Cloud."
+	echo
 	
 	# store the changes to the push history in the repository
 	echo Ignore the error message below.
-	echo
 	git add . >> trash.txt
 	echo
 	git commit --quiet -m "updating push history" >> trash.txt
