@@ -26,6 +26,10 @@ then
 	echo $userName >> pull-history.txt
 	git pull >> pull-history.txt
 
+	git add .
+	git commit -m "updating pull history"
+	git push
+
 	echo "all files are up to date with the cloud"
 else
 	echo "you have made no changes to the files"
@@ -34,6 +38,10 @@ else
 	echo >> pull-history.txt
 	echo $userName >> pull-history.txt
 	git pull >> pull-history.txt
+
+	git add .
+	git commit -m "updating pull history"
+	git push	
 
 	echo "all the files are up to date with the cloud"
 fi
