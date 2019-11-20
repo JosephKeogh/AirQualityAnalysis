@@ -18,7 +18,7 @@ then
 	echo "Saving your changes to the Cloud..."
 	echo
 
-	git add .
+	git add . >> push-info.txt
 	git commit -m "Automatically making commit for $userName"
 	git push >> push-info.txt
 
@@ -31,7 +31,7 @@ then
 	echo $userName >> pull-history.txt
 	git pull >> pull-history.txt
 
-	git add .
+	git add . >> push-info.txt
 	git commit -m "updating pull history"
 	git push >> push-info.txt
 
@@ -47,7 +47,7 @@ else
 	echo $userName >> pull-history.txt
 	git pull >> pull-history.txt
 
-	git add .
+	git add . >> push-info.txt
 	git commit -m "updating pull history"
 	git push >> push-info.txt	
 
