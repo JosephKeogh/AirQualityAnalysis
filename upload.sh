@@ -24,15 +24,15 @@ echo
 
 	# push the user's changes and store info
 	git add . >> push-history.txt
-	git commit -m "Automatically making commit for $userName" >> push-history.txt
-	git push >> push-history.txt
+	git commit --quiet -m "Automatically making commit for $userName" >> push-history.txt
+	git push --quiet >> push-history.txt
 
 	# message to user
 	echo "Changes saved to the Cloud."
 	
 	# store the changes to the push history in the repository
 	git add . >> trash.txt
-	git commit -m "updating push history" >> trash.txt
+	git commit --quiet -m "updating push history" >> trash.txt
 	git push --quiet >> trash.txt
 	
 rm trash.txt
