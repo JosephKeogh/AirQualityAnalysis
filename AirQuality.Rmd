@@ -52,11 +52,13 @@ dailyAQ <- aggregate(AQdata, by=list(as.Date(airquality[,1],"%m/%d/%Y")), FUN=ma
 
 # create testing and training data
 ```{r}
-train_index <- sample(1:nrow(dailyAQ), nrow(dailyAQ)-7)
-test_index <- setdiff(1:nrow(dailyAQ), train_index)
 
-air.train <- dailyAQ[train_index, ]
-air.test <- dailyAQ[test_index, ]
+# the index to split the data on
+separationIndex <- nrow(dailyAQ)-6
+
+# split the data
+air.train <- dailyAQ[1:separationIndex-1,]
+air.test <- dailyAQ[separationIndex:nrow(dailyAQ),]
 
 # making sure no data was duplicated or lost
 a <- nrow(dailyAQ)
@@ -86,6 +88,8 @@ CO.ts <- ts(air.train$CO.GT.)
 plot(CO.ts)
 
 # periodogram
+# this pumps out a different graph sometimes
+  # is this because it is doing fast Fourier Transfer??
 pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
 
 # acf and pacf
