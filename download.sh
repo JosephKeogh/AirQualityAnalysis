@@ -18,7 +18,7 @@ then
 	echo "saving the changes to the cloud..."
 	echo
 
-	git add
+	git add .
 	git commit -m "automatically making commit"
 	git push >> push-info.txt
 
