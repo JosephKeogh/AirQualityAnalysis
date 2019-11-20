@@ -9,7 +9,7 @@ output:
 
 ```{r setup, include=FALSE}
 require("knitr")
-datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/WeatherData"
+datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/AirQualityData"
 sourcedir <-"C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Code"
 opts_knit$set(root.dir = sourcedir)
 library(forecast)
@@ -49,3 +49,232 @@ AQdata <- i$filled.dataset
 # aggregate to daily maxima for model building
 dailyAQ <- aggregate(AQdata, by=list(as.Date(airquality[,1],"%m/%d/%Y")), FUN=max)
 ```
+
+# create testing and training data
+```{r}
+train_index <- sample(1:nrow(dailyAQ), nrow(dailyAQ)-7)
+test_index <- setdiff(1:nrow(dailyAQ), train_index)
+
+air.train <- dailyAQ[train_index, ]
+air.test <- dailyAQ[test_index, ]
+
+# making sure no data was duplicated or lost
+a <- nrow(dailyAQ)
+b <- nrow(air.train)
+c <- nrow(air.test)
+
+a
+b
+c
+```
+
+# review the data
+```{r}
+summary(air.train)
+```
+
+Data from March 2004 - April 2005
+
+Looking at different levels of chemicals in the air
+
+# visualize the data
+```{r}
+# create time series
+CO.ts <- ts(air.train$CO.GT.)
+
+# visualize raw data
+plot(CO.ts)
+
+# periodogram
+pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
+
+# acf and pacf
+acf(CO.ts)
+pacf(CO.ts)
+
+```
+
+based on the periodogram there is not one main season, but possible multiple
+-if there is seasonality it will be based on a complex wave
+
+No obvious trend or seasonality
+
+# grab the main periods
+```{r}
+# sort the frequencies based on influence
+sorted.spec <- sort(pg.CO$spec, decreasing=T, index.return=T)
+
+# convert to periods
+sorted.omegas <- pg.CO$freq[sorted.spec$ix]
+sorted.Ts <- 1/pg.CO$freq[sorted.spec$ix]
+
+# the cutoff for influencial
+CO.pg.cutoff <- 10
+
+# the top periods
+print('top periods')
+sorted.Ts[1:CO.pg.cutoff]
+
+# top frequencies
+## to double check that this makes sense based on periodogram
+print('top frequencies')
+sorted.omegas[1:CO.pg.cutoff]
+
+# visual
+CO.pg.box <- boxplot(sorted.Ts[1:CO.pg.cutoff], main="Period Boxplot")
+
+# the average influencial period
+print('mean of top periods')
+CO.pg.box.mean <- CO.pg.box$stats[3]
+print(CO.pg.box.mean)
+```
+
+The average influencial period can be interpreted as on average the seasons have a period of 3.7 days
+
+The top ten periods are about: 3.7, 2.3 and 5
+
+The top ten frequencies are about: 0.27, 0.44, and 0.2
+-this makes sense based on the periodogram
+  - would like to add one more frequency at about 0.05
+    - shows up in top 20 frequencies
+    
+# assign top periods to variables
+```{r}
+# ideally these are not hard coded
+CO.p1 <- 1/.27
+CO.p2 <- 1/.44
+CO.p3 <- 1/.2
+CO.p4 <- 1/0.05
+
+CO.p1
+CO.p2
+CO.p3
+CO.p4
+
+
+```
+
+    
+# create model based on the top periods identified
+```{r}
+# create time variable
+time.CO<-c(1:length(CO.ts))
+
+# actual model
+CO.lm.top4 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) + 
+                         cos(2*pi*time.CO/CO.p1) +
+                         sin(2*pi*time.CO/CO.p2) + 
+                         cos(2*pi*time.CO/CO.p2) +
+                         sin(2*pi*time.CO/CO.p3) + 
+                         cos(2*pi*time.CO/CO.p3) +
+                         sin(2*pi*time.CO/CO.p4) + 
+                         cos(2*pi*time.CO/CO.p4))
+
+# model summary
+summary(CO.lm.top4)
+
+```
+
+# compare larger model with model with only first important period
+```{r}
+# actual model
+CO.lm.top1 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) + 
+                         cos(2*pi*time.CO/CO.p1))
+
+# model summary
+summary(CO.lm.top1)
+
+# anova
+anova(CO.lm.top1, CO.lm.top4)
+```
+
+There is significant evidence to use the larger model
+
+# perfrom step analysis on large model
+```{r}
+CO.lm.step <- step(CO.lm.top4)
+summary(CO.lm.step)
+```
+
+# visual inspection of large model
+```{r}
+plot(CO.ts)
+lines(CO.lm.top4$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(0,100))
+lines(CO.lm.top4$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(100,200))
+lines(CO.lm.top4$fitted.values, col = "red")
+```
+
+So the model is pretty bad, maybe we need to look at the first or second differences
+
+# visual inspection of step model
+```{r}
+plot(CO.ts)
+lines(CO.lm.step$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(0,100))
+lines(CO.lm.step$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(100,200))
+lines(CO.lm.step$fitted.values, col = "red")
+```
+
+step model also sucks
+
+Conclusion
+-Use the step function because it will have the highest AIC
+
+# trend
+# predict the time series based on time
+```{r}
+# the actual model
+CO.lm.trend <- lm(CO.ts ~ time.CO)
+
+# summary analysis
+summary(CO.lm.trend)
+```
+
+The p-value is 0.92 so there is not a significant trend in the data
+
+  
+
+# max level of NO2
+```{r}
+# create time series
+NO.ts <- ts(air.train$NO2.GT.)
+
+# visualize raw data
+plot(NO.ts)
+
+# periodogram
+pg.NO <- spec.pgram(NO.ts,spans=9,demean=T,log='no')
+
+# acf and pacf
+acf(NO.ts)
+pacf(NO.ts)
+
+```
+
+No obvious trend or seasonality based on raw data
+
+based on periodogram there may be some seasonlity, but it is going to be based on complex waves
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
