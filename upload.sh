@@ -26,8 +26,8 @@ echo
 	echo Ignore the error message below.
 	git add . >> push-history.txt
 	echo
-	git commit --quiet -m "Automatically making commit for $userName" >> push-history.txt
-	git push --quiet >> push-history.txt
+	git commit -m "Automatically making commit for $userName" >> push-history.txt
+	git push >> push-history.txt
 
 	# message to user
 	echo "Changes saved to the Cloud."
