@@ -12,3 +12,5 @@ then
 else
 	echo "the files are NOT different"
 fi
+
+>> difference.txt
