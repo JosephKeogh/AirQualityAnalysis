@@ -5,7 +5,7 @@ echo "Please enter your name..."
 read userName
 
 echo Thank You $userName
-echo .
+echo
 
 git status >> test.txt
 
@@ -14,18 +14,18 @@ diff test.txt download-ready.txt >> difference.txt
 if [ -s difference.txt ]
 then
 	echo "you have made changes to the files..."
-	echo .
+	echo
 	echo "saving the changes to the cloud..."
-	echo .
+	echo
 
-	git add .
+	git add
 	git commit -m "automatically making commit"
-	git push > push-info.txt
+	git push >> push-info.txt
 
 	echo "changes saved to the cloud"
-	echo .
+	echo
 	echo "downloading files from the cloud..."
-	echo .
+	echo
 
 	echo >> pull-history.txt
 	echo $userName >> pull-history.txt
@@ -33,15 +33,15 @@ then
 
 	git add .
 	git commit -m "updating pull history"
-	git push > push-info.txt
+	git push >> push-info.txt
 
 	echo "all files are up to date with the cloud"
-	echo .
+	echo
 else
 	echo "you have made no changes to the files"
 	echo .
 	echo "downloading files from the cloud..."
-	echo .
+	echo
 
 	echo >> pull-history.txt
 	echo $userName >> pull-history.txt
@@ -49,10 +49,10 @@ else
 
 	git add .
 	git commit -m "updating pull history"
-	git push > push-info.txt	
+	git push >> push-info.txt	
 
 	echo "all the files are up to date with the cloud"
-	echo .
+	echo
 fi
 
 rm push-info.txt
