@@ -26,10 +26,12 @@ echo
 	echo Ignore the error message below.
 	git add . >> push-history.txt
 	echo
+	echo A message from GitHub...
 	git commit -m "Automatically making commit for $userName" >> push-history.txt
 	git push >> push-history.txt
 
 	# message to user
+	echo
 	echo "Changes saved to the Cloud."
 	echo
 	
