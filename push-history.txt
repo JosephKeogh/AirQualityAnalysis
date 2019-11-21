@@ -57,3 +57,55 @@ After doing this, you may fix the identity used for this commit with:
     git commit --amend --reset-author
 
  1 file changed, 3 insertions(+)
+
+<<<<<<< HEAD
+Wed Nov 20 19:33:06 EST 2019
+Anna
+[master 9c32740] Automatically making commit for Anna
+ Committer: Anna Haikl <annahaikl@d-172-25-44-14.dhcp.virginia.edu>
+=======
+Wed Nov 20 17:35:58 EST 2019
+Camryn
+[master 06e06e2] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-25-45-32.dhcp.virginia.edu>
+>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+<<<<<<< HEAD
+ 2 files changed, 264 insertions(+), 9 deletions(-)
+=======
+ 1 file changed, 3 insertions(+)
+
+Wed Nov 20 19:25:42 EST 2019
+Camryn
+[master 16e7396] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-25-45-32.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 151 insertions(+), 31 deletions(-)
+
+Wed, Nov 20, 2019  7:32:28 PM
+Joseph Testing Pull Request File
+[master 09dbebd] Automatically making commit for Joseph Testing Pull Request File
+ 1 file changed, 3 insertions(+)
+>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5

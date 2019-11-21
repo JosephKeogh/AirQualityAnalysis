@@ -1,23 +1,43 @@
 ---
 title: "Project 2"
-author: "Group Members' Names"
-date: "Date"
+author: "Camryn Burley, Anna Haikl, and Joesph Keogh"
+date: "12-4-19"
+abstract: "On our honor as students, we have neither given nor received aid on this assignment."
 output:
   pdf_dCOument: default
   html_dCOument: default
 ---
 
+<<<<<<< HEAD
+```{r setup, include=FALSE}
+=======
+<<<<<<< HEAD
+Anna's Setup
+=======
+>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
 ```{r setup, include=FALSE}
 require("knitr")
-datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/AirQualityData"
-sourcedir <-"C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Code"
+datadir <- "/Users/annahaikl/Desktop/UVA/FALL 2019/4021/DATA/Air Quality"
+sourcedir <-"/Users/annahaikl/Desktop/UVA/FALL 2019/4021/CODE"
 opts_knit$set(root.dir = sourcedir)
 library(forecast)
 library(mtsdi)
 library(MTS)
 ```
 
-# Load data and impute missing values
+```{r setup, include = FALSE}
+# Camryn Set Up
+>>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
+require("knitr")
+datadir <- "/Users/camrynburley/Desktop/UVA/SYS4021/Data/AirQuality"
+sourcedir <- "/Users/camrynburley/Desktop/UVA/SYS4021/RCode"
+opts_knit$set(root.dir = sourcedir)
+library(forecast)
+library(mtsdi)
+library(MTS)
+```
+
+# Load Data and Impute Missing Values
 ```{r, warning=FALSE}
 setwd(datadir)
 
@@ -50,9 +70,8 @@ AQdata <- i$filled.dataset
 dailyAQ <- aggregate(AQdata, by=list(as.Date(airquality[,1],"%m/%d/%Y")), FUN=max)
 ```
 
-# create testing and training data
+# Create Testing and Training Data
 ```{r}
-
 # the index to split the data on
 separationIndex <- nrow(dailyAQ)-6
 
@@ -70,16 +89,14 @@ b
 c
 ```
 
-# review the data
+# Data Summary
 ```{r}
 summary(air.train)
 ```
+The data is from March 2004 through April 2005. We are modeling the ambient daily maximum carbon monoxide (CO) and nitrogen dioxide (NO2) concentrations. 
 
-Data from March 2004 - April 2005
-
-Looking at different levels of chemicals in the air
-
-# visualize the data
+# Univariate Time Series for CO
+## Visualize the Data
 ```{r}
 # create time series
 CO.ts <- ts(air.train$CO.GT.)
@@ -95,7 +112,6 @@ pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
 # acf and pacf
 acf(CO.ts)
 pacf(CO.ts)
-
 ```
 
 based on the periodogram there is not one main season, but possible multiple
@@ -103,7 +119,8 @@ based on the periodogram there is not one main season, but possible multiple
 
 No obvious trend or seasonality
 
-# grab the main periods
+## Seasonality
+### Finding Potential Periods
 ```{r}
 # sort the frequencies based on influence
 sorted.spec <- sort(pg.CO$spec, decreasing=T, index.return=T)
@@ -139,7 +156,7 @@ plot(sorted.Ts[1:CO.pg.cutoff])
 The top 5 frequencies are 
 
     
-# assign top periods to variables
+### Assign Potential Periods to Variables
 ```{r}
 CO.p1 <- sorted.Ts[1]
 CO.p2 <- sorted.Ts[2]
@@ -151,13 +168,15 @@ CO.p1
 CO.p2
 CO.p3
 CO.p4
+<<<<<<< HEAD
 CO.p5
 
 
+=======
+>>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
 ```
 
-    
-# create model based on the top periods identified
+### Create Model with Potential Periods
 ```{r}
 # create time variable
 time.CO<-c(1:length(CO.ts))
@@ -177,7 +196,7 @@ CO.lm.top4 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p2) +
 summary(CO.lm.top4)
 ```
 
-# compare larger model with model with only first important period
+### Compare Larger Model with Model with Only First Important Period
 ```{r}
 # actual model
 CO.lm.top1 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p2) + 
@@ -216,15 +235,19 @@ anova(CO.lm.top4, CO.lm.top5)
 
 There is significant evidence to use the larger model
 
+<<<<<<< HEAD
 In my opinion the only reason we are seeing a period is because this is the length of the data set
 
 # perfrom step analysis on large model
+=======
+### Stepwise Regression on Larger Model
+>>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
 ```{r}
 CO.lm.step <- step(CO.lm.top5)
 summary(CO.lm.step)
 ```
 
-# visual inspection of large model
+### Visual Inspection of Larger Model
 ```{r}
 plot(CO.ts)
 lines(CO.lm.top5$fitted.values, col = "red")
@@ -240,7 +263,7 @@ model follows the general trend of the data
 
 no small fuctuations though, may need to add smaller frequency
 
-# visual inspection of step model
+### Visual Inspection of Step Model
 ```{r}
 plot(CO.ts)
 lines(CO.lm.step$fitted.values, col = "red")
@@ -345,9 +368,14 @@ We will take the larger function, it follows the data more closely, and has the 
 CO.lm.seasonal <- CO.lm.step.1
 ```
 
+<<<<<<< HEAD
+=======
+Conclusion
+-Use the step function because it has the highest AIC
+>>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
 
-# trend
-# predict the time series based on time
+## Trend
+### Model Time Series Based on Time
 ```{r}
 # the actual model
 CO.lm.trend <- lm(CO.ts ~ time.CO)
@@ -412,8 +440,27 @@ CO.residuals <- CO.residuals.auto
 CO.seasonal.trend.residuals <- lm(CO.ts ~ CO.seasonal.trend + CO.residuals)
 ```
 
+<<<<<<< HEAD
+=======
+## Autoregressive and Moving Average Components
+>>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
 
-# max level of NO2
+## Model Assessment 
+### Metrics
+compare models based on adjusted R2 and/or AIC
+### Diagnostics
+diagnostics of linear models of trends + seasonality and ARIMA models of residuals
+### Forecasting
+compare models based on MSE
+
+## Final Model
+
+## Diagnostics
+what problems remain in the diagnostics of the selected model?
+
+
+# Univariate Time Series for NO2
+## Visualize the Data
 ```{r}
 # create time series
 NO.ts <- ts(air.train$NO2.GT.)
@@ -427,26 +474,395 @@ pg.NO <- spec.pgram(NO.ts,spans=9,demean=T,log='no')
 # acf and pacf
 acf(NO.ts)
 pacf(NO.ts)
-
 ```
 
 No obvious trend or seasonality based on raw data
 
 based on periodogram there may be some seasonlity, but it is going to be based on complex waves
 
+Determine if there is seasonality in the data
+```{r}
+# sort the frequencies based on influence
+sorted.spec.NO <- sort(pg.NO$spec, decreasing=T, index.return=T)
+
+# convert to periods
+sorted.omegas.NO <- pg.NO$freq[sorted.spec.NO$ix]
+sorted.Ts.NO <- 1/pg.NO$freq[sorted.spec.NO$ix]
+
+plot(sorted.Ts.NO, xlim = c(1,20))
+
+# the cutoff for influencial
+NO.pg.cutoff <- 15
 
 
+# the top periods
+print('top periods')
+sorted.Ts[1:NO.pg.cutoff]
+
+# top frequencies
+## to double check that this makes sense based on periodogram
+print('top frequencies')
+sorted.omegas.NO[1:NO.pg.cutoff]
+
+# visual
+NO.pg.box <- boxplot(sorted.Ts.NO[1:NO.pg.cutoff], main="Period Boxplot")
+
+# the average influencial period
+print('mean of top periods')
+NO.pg.box.mean <- NO.pg.box$stats[3]
+print(NO.pg.box.mean)
+```
+
+The average influencial period can be interpreted as on average the seasons have a period of 48 days
+
+The top 15 periods range from 6.62 to 384 days
+
+The top 15 frequencies range from 0.0026 to 0.15
+    
+Assign top periods to variables
+```{r}
+NO.p1 <- sorted.Ts.NO[1]
+NO.p2 <- sorted.Ts.NO[2]
+NO.p3 <- sorted.Ts.NO[3]
+NO.p4 <- sorted.Ts.NO[4]
+NO.p5 <- sorted.Ts.NO[5]
+NO.p6 <- sorted.Ts.NO[6]
+NO.p7 <- sorted.Ts.NO[7]
+NO.p8 <- sorted.Ts.NO[8]
+NO.p9 <- sorted.Ts.NO[9]
+NO.p10 <- sorted.Ts.NO[10]
+NO.p11 <- sorted.Ts.NO[11]
+NO.p12 <- sorted.Ts.NO[12]
+NO.p13 <- sorted.Ts.NO[13]
+NO.p14 <- sorted.Ts.NO[14]
+NO.p15 <- sorted.Ts.NO[15]
+
+NO.pavg1 <- mean(c(sorted.Ts.NO[8],sorted.Ts.NO[9], sorted.Ts.NO[10], sorted.Ts.NO[11]))
+NO.pavg2 <- mean(c(sorted.Ts.NO[12],sorted.Ts.NO[13], sorted.Ts.NO[14], sorted.Ts.NO[15]))
+```
+
+NO Model for top 3 Periods
+```{r}
+# create time variable
+time.NO<-c(1:length(NO.ts))
+
+# actual model
+NO.lm.top3 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3)) 
+
+# model summary
+summary(NO.lm.top3)
+```
+NO Model for top 5 Periods
+```{r}
+# actual model
+NO.lm.top5 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5)) 
+
+# model summary
+summary(NO.lm.top5)
+```
+NO Model for top 10 Periods
+```{r}
+# actual model
+NO.lm.top10 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5) + 
+                         sin(2*pi*time.NO/NO.p6) + 
+                         cos(2*pi*time.NO/NO.p6) +
+                         sin(2*pi*time.NO/NO.p7) + 
+                         cos(2*pi*time.NO/NO.p7) +
+                         sin(2*pi*time.NO/NO.p8) + 
+                         cos(2*pi*time.NO/NO.p8) +
+                         sin(2*pi*time.NO/NO.p9) + 
+                         cos(2*pi*time.NO/NO.p9) +
+                         sin(2*pi*time.NO/NO.p10) + 
+                         cos(2*pi*time.NO/NO.p10)) 
+
+# model summary
+summary(NO.lm.top10)
+```
+NO Model for top 15 Periods
+```{r}
+# actual model
+NO.lm.top15 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5) + 
+                         sin(2*pi*time.NO/NO.p6) + 
+                         cos(2*pi*time.NO/NO.p6) +
+                         sin(2*pi*time.NO/NO.p7) + 
+                         cos(2*pi*time.NO/NO.p7) +
+                         sin(2*pi*time.NO/NO.p8) + 
+                         cos(2*pi*time.NO/NO.p8) +
+                         sin(2*pi*time.NO/NO.p9) + 
+                         cos(2*pi*time.NO/NO.p9) +
+                         sin(2*pi*time.NO/NO.p10) + 
+                         cos(2*pi*time.NO/NO.p10) +
+                         sin(2*pi*time.NO/NO.p11) + 
+                         cos(2*pi*time.NO/NO.p11) + 
+                         sin(2*pi*time.NO/NO.p12) + 
+                         cos(2*pi*time.NO/NO.p12) +
+                         sin(2*pi*time.NO/NO.p13) + 
+                         cos(2*pi*time.NO/NO.p13) +
+                         sin(2*pi*time.NO/NO.p14) + 
+                         cos(2*pi*time.NO/NO.p14) +
+                         sin(2*pi*time.NO/NO.p15) + 
+                         cos(2*pi*time.NO/NO.p15)) 
+
+# model summary
+summary(NO.lm.top15)
+```
+NO Model with Averaged Periods 
+```{r}
+# actual model
+NO.lm.combined <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5) +
+                         sin(2*pi*time.NO/NO.p6) + 
+                         cos(2*pi*time.NO/NO.p6) +
+                         sin(2*pi*time.NO/NO.p7) + 
+                         cos(2*pi*time.NO/NO.p7) +
+                         sin(2*pi*time.NO/NO.pavg1) + 
+                         cos(2*pi*time.NO/NO.pavg1) +
+                         sin(2*pi*time.NO/NO.pavg2) + 
+                         cos(2*pi*time.NO/NO.pavg2)) 
+
+# model summary
+summary(NO.lm.combined)
+```
+
+Model Comparison
+```{r}
+anova(NO.lm.top3, NO.lm.top5)
+#small p-value suggests that the larger model performs better than the smaller model 
+
+anova(NO.lm.top5, NO.lm.top10)
+#small p-value suggests that the larger model performs better than the smaller model 
+
+anova(NO.lm.top10, NO.lm.top15)
+#large p-value suggests that the smaller model performs better 
+
+anova(NO.lm.top10, NO.lm.combined)
+#large p-value suggests that the smaller model performs better 
+
+anova(NO.lm.combined, NO.lm.top5)
+#small p-value suggests that the larger model performs better
+```
+
+<<<<<<< HEAD
+The partial-F tests suggest that the largest model, the one with 10 periods included, is the best predictor of the time series 
+
+Visually inspect step model 
+```{r}
+plot(NO.ts)
+lines(NO.lm.top3$fitted.values, col = "red")
+lines(NO.lm.top5$fitted.values, col = "blue")
+lines(NO.lm.top10$fitted.values, col = "green")
+lines(NO.lm.combined$fitted.values, col = "orange")
+
+legend(0, 350, legend = c("Top 3 Periods", "Top 5 Periods", "Top 10 Periods", "Combined Periods"), col = c("red", "blue", "green", "orange"), lwd = 1)
+```
+The graph suggests that the model that contains the combined periods is the best predictor
+
+Visual Inspection of the Combined Periods 
+```{r}
+plot(NO.ts)
+lines(NO.lm.combined$fitted.values, col = "blue")
+=======
+# Multivariate Time Series
+## Seasonality
+## Trend
+## Autoregressive and Moving Average Components
+### Metrics
+compare models based on adjusted R2 and/or AIC
+### Diagnostics
+diagnostics of linear models of trends + seasonality and ARIMA models of residuals
+### Forecasting
+compare models based on MSE
+
+## Final Model
+
+## Diagnostics
+what problems remain in the diagnostics of the selected model?
+>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
+
+```
+Determine if there is a trend in the data 
+```{r}
+# the actual model
+NO.lm.trend <- lm(NO.ts ~ time.NO)
+
+<<<<<<< HEAD
+# summary analysis
+summary(NO.lm.trend)
+
+plot(time.NO, NO.ts, type = "l")
+abline(NO.lm.trend, col = "red")
+```
+This shows that there is a trend in the data 
+
+Make a combined model of seasonality and trend 
+```{r}
+NO.trendseason <- lm(NO.ts ~ time.NO + sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5) +
+                         sin(2*pi*time.NO/NO.p6) + 
+                         cos(2*pi*time.NO/NO.p6) +
+                         sin(2*pi*time.NO/NO.p7) + 
+                         cos(2*pi*time.NO/NO.p7) +
+                         sin(2*pi*time.NO/NO.pavg1) + 
+                         cos(2*pi*time.NO/NO.pavg1) +
+                         sin(2*pi*time.NO/NO.pavg2) + 
+                         cos(2*pi*time.NO/NO.pavg2))
+
+summary(NO.trendseason)
+
+plot(NO.ts)
+lines(NO.trendseason$fitted.values, col = "blue")
+lines(NO.lm.combined$fitted.values, col = "red")
+
+anova(NO.trendseason, NO.lm.combined)
+```
+=======
+# Simulation from Univariate CO Model
+```{r}
+# CO univariate model = model of data + model of residuals
+CO.uni <- CO.final + CO.resi.final # idk that this is the way to do this
+
+# simulate 1 year of daily maximum CO concentrations
+### fix this based on actual ar and ma terms
+CO.uni.sim <- arima.sim(n = 365*1, list(ar = c(CO.uni$coef[1], CO.uni$coef[2]), ma = c(CO.uni$coef[3])), sd = sqrt(CO.uni$sigma2))
+
+# make time series
+CO.uni.sim.ts <- ts(CO.uni.sim)
+```
+
+## Visualization
+```{r}
+# plot simulated values with observations
+plot(CO.ts, main = "Simulation from Univariate CO Model", col = "black")
+lines(CO.uni.sim.ts, col = "red")
+legend(0.6, 0.57, legend = c("Time Series Data", "Simulation"), col = c("black", "red"))
+```
+how does simulation compare visually with time series data?
+
+## Trend
+```{r}
+# linear model for simulation
+CO.sim.lm <- lm()
+```
+compare coefficient estimates
+>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
+
+## Seasonality
+```{r}
+# compare periodogram of observations and periodogram of simulation
+par(mfrow = c(1,2))
+pg.CO
+pg.CO.uni.sim <- spec.pgram(CO.uni.sim.ts, spans = 9, demean = T, log = 'no')
+par(mfrow = c(1,1))
+```
+compare periodograms (get periods?)
+
+## Mean and Variance
+```{r}
+# mean of observations
+mean(CO.ts)
+
+# mean of simulation
+mean(CO.uni.sim.ts)
+
+# variance of observations
+var(CO.ts)
+
+# variance of simulation
+var(CO.uni.sim.ts)
+```
+compare mean and variance
+
+## Auto-Correlation
+```{r}
+# ACF of observations
+acf(CO.ts)
+
+# ACF of simulation
+acf(CO.uni.sim.ts)
+```
+compare ACF
+
+```{r}
+# PACF of observations
+pacf(CO.ts)
+
+# PACF of simulation
+pacf(CO.uni.sim.ts)
+```
+compare PACF
+
+## Cross-Correlation
+```{r}
+# cross-correlation of observations
+cor(air.train$CO.GT.)
+
+# cross-correlation of simulation
+cor(CO.uni.sim)
+```
+compare cross-correlation
+
+# Simulation from Univariate NO2 Model
+## Visualization
+## Trend
+## Seasonality
+## Mean and Variance
+## Auto-Correlation
+## Cross-Correlation
 
 
-
-
-
-
-
-
-
-
-
-
-
+# Simulation from Multivariate Model
+## Visualization
+## Trend
+## Seasonality
+## Mean and Variance
+## Auto-Correlation
+## Cross-Correlation
 
