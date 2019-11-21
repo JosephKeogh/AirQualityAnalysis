@@ -1,20 +1,18 @@
 ---
 title: "Project 2"
-author: "Group Members' Names"
-date: "Date"
+author: "Camryn Burley, Anna Haikl, and Joesph Keogh"
+date: "12-4-19"
+abstract: "On our honor as students, we have neither given nor received aid on this assignment."
 output:
   pdf_document: default
   html_document: default
 ---
 
-```{r}
-a <- sin(0)
-```
-
+Anna's Setup
 ```{r setup, include=FALSE}
 require("knitr")
-datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/AirQualityData"
-sourcedir <-"C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Code"
+datadir <- "/Users/annahaikl/Desktop/UVA/FALL 2019/4021/DATA/Air Quality"
+sourcedir <-"/Users/annahaikl/Desktop/UVA/FALL 2019/4021/CODE"
 opts_knit$set(root.dir = sourcedir)
 library(forecast)
 library(mtsdi)
@@ -180,7 +178,6 @@ CO.lm.top4 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) +
 
 # model summary
 summary(CO.lm.top4)
-
 ```
 
 # compare larger model with model with only first important period
@@ -270,15 +267,270 @@ No obvious trend or seasonality based on raw data
 
 based on periodogram there may be some seasonlity, but it is going to be based on complex waves
 
+Determine if there is seasonality in the data
+```{r}
+# sort the frequencies based on influence
+sorted.spec.NO <- sort(pg.NO$spec, decreasing=T, index.return=T)
+
+# convert to periods
+sorted.omegas.NO <- pg.NO$freq[sorted.spec.NO$ix]
+sorted.Ts.NO <- 1/pg.NO$freq[sorted.spec.NO$ix]
+
+plot(sorted.Ts.NO, xlim = c(1,20))
+
+# the cutoff for influencial
+NO.pg.cutoff <- 15
 
 
+# the top periods
+print('top periods')
+sorted.Ts[1:NO.pg.cutoff]
 
+# top frequencies
+## to double check that this makes sense based on periodogram
+print('top frequencies')
+sorted.omegas.NO[1:NO.pg.cutoff]
 
+# visual
+NO.pg.box <- boxplot(sorted.Ts.NO[1:NO.pg.cutoff], main="Period Boxplot")
 
+# the average influencial period
+print('mean of top periods')
+NO.pg.box.mean <- NO.pg.box$stats[3]
+print(NO.pg.box.mean)
+```
 
+The average influencial period can be interpreted as on average the seasons have a period of 48 days
 
+The top 15 periods range from 6.62 to 384 days
 
+The top 15 frequencies range from 0.0026 to 0.15
+    
+Assign top periods to variables
+```{r}
+NO.p1 <- sorted.Ts.NO[1]
+NO.p2 <- sorted.Ts.NO[2]
+NO.p3 <- sorted.Ts.NO[3]
+NO.p4 <- sorted.Ts.NO[4]
+NO.p5 <- sorted.Ts.NO[5]
+NO.p6 <- sorted.Ts.NO[6]
+NO.p7 <- sorted.Ts.NO[7]
+NO.p8 <- sorted.Ts.NO[8]
+NO.p9 <- sorted.Ts.NO[9]
+NO.p10 <- sorted.Ts.NO[10]
+NO.p11 <- sorted.Ts.NO[11]
+NO.p12 <- sorted.Ts.NO[12]
+NO.p13 <- sorted.Ts.NO[13]
+NO.p14 <- sorted.Ts.NO[14]
+NO.p15 <- sorted.Ts.NO[15]
 
+NO.pavg1 <- mean(c(sorted.Ts.NO[8],sorted.Ts.NO[9], sorted.Ts.NO[10], sorted.Ts.NO[11]))
+NO.pavg2 <- mean(c(sorted.Ts.NO[12],sorted.Ts.NO[13], sorted.Ts.NO[14], sorted.Ts.NO[15]))
+```
+
+NO Model for top 3 Periods
+```{r}
+# create time variable
+time.NO<-c(1:length(NO.ts))
+
+# actual model
+NO.lm.top3 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3)) 
+
+# model summary
+summary(NO.lm.top3)
+```
+NO Model for top 5 Periods
+```{r}
+# actual model
+NO.lm.top5 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5)) 
+
+# model summary
+summary(NO.lm.top5)
+```
+NO Model for top 10 Periods
+```{r}
+# actual model
+NO.lm.top10 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5) + 
+                         sin(2*pi*time.NO/NO.p6) + 
+                         cos(2*pi*time.NO/NO.p6) +
+                         sin(2*pi*time.NO/NO.p7) + 
+                         cos(2*pi*time.NO/NO.p7) +
+                         sin(2*pi*time.NO/NO.p8) + 
+                         cos(2*pi*time.NO/NO.p8) +
+                         sin(2*pi*time.NO/NO.p9) + 
+                         cos(2*pi*time.NO/NO.p9) +
+                         sin(2*pi*time.NO/NO.p10) + 
+                         cos(2*pi*time.NO/NO.p10)) 
+
+# model summary
+summary(NO.lm.top10)
+```
+NO Model for top 15 Periods
+```{r}
+# actual model
+NO.lm.top15 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5) + 
+                         sin(2*pi*time.NO/NO.p6) + 
+                         cos(2*pi*time.NO/NO.p6) +
+                         sin(2*pi*time.NO/NO.p7) + 
+                         cos(2*pi*time.NO/NO.p7) +
+                         sin(2*pi*time.NO/NO.p8) + 
+                         cos(2*pi*time.NO/NO.p8) +
+                         sin(2*pi*time.NO/NO.p9) + 
+                         cos(2*pi*time.NO/NO.p9) +
+                         sin(2*pi*time.NO/NO.p10) + 
+                         cos(2*pi*time.NO/NO.p10) +
+                         sin(2*pi*time.NO/NO.p11) + 
+                         cos(2*pi*time.NO/NO.p11) + 
+                         sin(2*pi*time.NO/NO.p12) + 
+                         cos(2*pi*time.NO/NO.p12) +
+                         sin(2*pi*time.NO/NO.p13) + 
+                         cos(2*pi*time.NO/NO.p13) +
+                         sin(2*pi*time.NO/NO.p14) + 
+                         cos(2*pi*time.NO/NO.p14) +
+                         sin(2*pi*time.NO/NO.p15) + 
+                         cos(2*pi*time.NO/NO.p15)) 
+
+# model summary
+summary(NO.lm.top15)
+```
+NO Model with Averaged Periods 
+```{r}
+# actual model
+NO.lm.combined <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5) +
+                         sin(2*pi*time.NO/NO.p6) + 
+                         cos(2*pi*time.NO/NO.p6) +
+                         sin(2*pi*time.NO/NO.p7) + 
+                         cos(2*pi*time.NO/NO.p7) +
+                         sin(2*pi*time.NO/NO.pavg1) + 
+                         cos(2*pi*time.NO/NO.pavg1) +
+                         sin(2*pi*time.NO/NO.pavg2) + 
+                         cos(2*pi*time.NO/NO.pavg2)) 
+
+# model summary
+summary(NO.lm.combined)
+```
+
+Model Comparison
+```{r}
+anova(NO.lm.top3, NO.lm.top5)
+#small p-value suggests that the larger model performs better than the smaller model 
+
+anova(NO.lm.top5, NO.lm.top10)
+#small p-value suggests that the larger model performs better than the smaller model 
+
+anova(NO.lm.top10, NO.lm.top15)
+#large p-value suggests that the smaller model performs better 
+
+anova(NO.lm.top10, NO.lm.combined)
+#large p-value suggests that the smaller model performs better 
+
+anova(NO.lm.combined, NO.lm.top5)
+#small p-value suggests that the larger model performs better
+```
+
+The partial-F tests suggest that the largest model, the one with 10 periods included, is the best predictor of the time series 
+
+Visually inspect step model 
+```{r}
+plot(NO.ts)
+lines(NO.lm.top3$fitted.values, col = "red")
+lines(NO.lm.top5$fitted.values, col = "blue")
+lines(NO.lm.top10$fitted.values, col = "green")
+lines(NO.lm.combined$fitted.values, col = "orange")
+
+legend(0, 350, legend = c("Top 3 Periods", "Top 5 Periods", "Top 10 Periods", "Combined Periods"), col = c("red", "blue", "green", "orange"), lwd = 1)
+```
+The graph suggests that the model that contains the combined periods is the best predictor
+
+Visual Inspection of the Combined Periods 
+```{r}
+plot(NO.ts)
+lines(NO.lm.combined$fitted.values, col = "blue")
+
+```
+Determine if there is a trend in the data 
+```{r}
+# the actual model
+NO.lm.trend <- lm(NO.ts ~ time.NO)
+
+# summary analysis
+summary(NO.lm.trend)
+
+plot(time.NO, NO.ts, type = "l")
+abline(NO.lm.trend, col = "red")
+```
+This shows that there is a trend in the data 
+
+Make a combined model of seasonality and trend 
+```{r}
+NO.trendseason <- lm(NO.ts ~ time.NO + sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5) +
+                         sin(2*pi*time.NO/NO.p6) + 
+                         cos(2*pi*time.NO/NO.p6) +
+                         sin(2*pi*time.NO/NO.p7) + 
+                         cos(2*pi*time.NO/NO.p7) +
+                         sin(2*pi*time.NO/NO.pavg1) + 
+                         cos(2*pi*time.NO/NO.pavg1) +
+                         sin(2*pi*time.NO/NO.pavg2) + 
+                         cos(2*pi*time.NO/NO.pavg2))
+
+summary(NO.trendseason)
+
+plot(NO.ts)
+lines(NO.trendseason$fitted.values, col = "blue")
+lines(NO.lm.combined$fitted.values, col = "red")
+
+anova(NO.trendseason, NO.lm.combined)
+```
 
 
 
