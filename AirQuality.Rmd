@@ -3,13 +3,9 @@ title: "Project 2"
 author: "Group Members' Names"
 date: "Date"
 output:
-  pdf_document: default
-  html_document: default
+  pdf_dCOument: default
+  html_dCOument: default
 ---
-
-```{r}
-a <- sin(0)
-```
 
 ```{r setup, include=FALSE}
 require("knitr")
@@ -117,7 +113,7 @@ sorted.omegas <- pg.CO$freq[sorted.spec$ix]
 sorted.Ts <- 1/pg.CO$freq[sorted.spec$ix]
 
 # the cutoff for influencial
-CO.pg.cutoff <- 10
+CO.pg.cutoff <- 5
 
 # the top periods
 print('top periods')
@@ -135,29 +131,27 @@ CO.pg.box <- boxplot(sorted.Ts[1:CO.pg.cutoff], main="Period Boxplot")
 print('mean of top periods')
 CO.pg.box.mean <- CO.pg.box$stats[3]
 print(CO.pg.box.mean)
+
+# plot top periods
+plot(sorted.Ts[1:CO.pg.cutoff])
 ```
 
-The average influencial period can be interpreted as on average the seasons have a period of 3.7 days
+The top 5 frequencies are 
 
-The top ten periods are about: 3.7, 2.3 and 5
-
-The top ten frequencies are about: 0.27, 0.44, and 0.2
--this makes sense based on the periodogram
-  - would like to add one more frequency at about 0.05
-    - shows up in top 20 frequencies
     
 # assign top periods to variables
 ```{r}
-# ideally these are not hard coded
-CO.p1 <- 1/.27
-CO.p2 <- 1/.44
-CO.p3 <- 1/.2
-CO.p4 <- 1/0.05
+CO.p1 <- sorted.Ts[1]
+CO.p2 <- sorted.Ts[2]
+CO.p3 <- sorted.Ts[3]
+CO.p4 <- sorted.Ts[4]
+CO.p5 <- sorted.Ts[5]
 
 CO.p1
 CO.p2
 CO.p3
 CO.p4
+CO.p5
 
 
 ```
@@ -169,25 +163,25 @@ CO.p4
 time.CO<-c(1:length(CO.ts))
 
 # actual model
-CO.lm.top4 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) + 
-                         cos(2*pi*time.CO/CO.p1) +
-                         sin(2*pi*time.CO/CO.p2) + 
+## not using the first period because it is basically the entire data set
+CO.lm.top4 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p2) + 
                          cos(2*pi*time.CO/CO.p2) +
                          sin(2*pi*time.CO/CO.p3) + 
                          cos(2*pi*time.CO/CO.p3) +
                          sin(2*pi*time.CO/CO.p4) + 
-                         cos(2*pi*time.CO/CO.p4))
+                         cos(2*pi*time.CO/CO.p4)+
+                         sin(2*pi*time.CO/CO.p5) + 
+                         cos(2*pi*time.CO/CO.p5))
 
 # model summary
 summary(CO.lm.top4)
-
 ```
 
 # compare larger model with model with only first important period
 ```{r}
 # actual model
-CO.lm.top1 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) + 
-                         cos(2*pi*time.CO/CO.p1))
+CO.lm.top1 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p2) + 
+                         cos(2*pi*time.CO/CO.p2))
 
 # model summary
 summary(CO.lm.top1)
@@ -196,27 +190,55 @@ summary(CO.lm.top1)
 anova(CO.lm.top1, CO.lm.top4)
 ```
 
+
 There is significant evidence to use the larger model
+
+# include the largest period
+```{r}
+# actual model
+CO.lm.top5 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) + 
+                         cos(2*pi*time.CO/CO.p1) +
+                         sin(2*pi*time.CO/CO.p2) + 
+                         cos(2*pi*time.CO/CO.p2) +
+                         sin(2*pi*time.CO/CO.p3) + 
+                         cos(2*pi*time.CO/CO.p3) +
+                         sin(2*pi*time.CO/CO.p4) + 
+                         cos(2*pi*time.CO/CO.p4)+
+                         sin(2*pi*time.CO/CO.p5) + 
+                         cos(2*pi*time.CO/CO.p5))
+
+# model summary
+summary(CO.lm.top5)
+
+# compare with smaller model
+anova(CO.lm.top4, CO.lm.top5)
+```
+
+There is significant evidence to use the larger model
+
+In my opinion the only reason we are seeing a period is because this is the length of the data set
 
 # perfrom step analysis on large model
 ```{r}
-CO.lm.step <- step(CO.lm.top4)
+CO.lm.step <- step(CO.lm.top5)
 summary(CO.lm.step)
 ```
 
 # visual inspection of large model
 ```{r}
 plot(CO.ts)
-lines(CO.lm.top4$fitted.values, col = "red")
+lines(CO.lm.top5$fitted.values, col = "red")
 
 plot(CO.ts, xlim=c(0,100))
-lines(CO.lm.top4$fitted.values, col = "red")
+lines(CO.lm.top5$fitted.values, col = "red")
 
 plot(CO.ts, xlim=c(100,200))
-lines(CO.lm.top4$fitted.values, col = "red")
+lines(CO.lm.top5$fitted.values, col = "red")
 ```
 
-So the model is pretty bad, maybe we need to look at the first or second differences
+model follows the general trend of the data
+
+no small fuctuations though, may need to add smaller frequency
 
 # visual inspection of step model
 ```{r}
@@ -230,10 +252,99 @@ plot(CO.ts, xlim=c(100,200))
 lines(CO.lm.step$fitted.values, col = "red")
 ```
 
-step model also sucks
+step model also follows the general trend of the data
 
-Conclusion
--Use the step function because it will have the highest AIC
+no small fluctuations though, need to possible add higher frequency components in
+
+
+# explore adding higher frequency components
+```{r}
+
+# visual for frequency
+plot(sorted.omegas, xlim=c(0,10))
+
+# visual for periods
+plot(sorted.Ts, xlim=c(0,30))
+
+# look at the 6th through 10th most influencial periods
+next.low.period <- boxplot(sorted.Ts[6:10])$stats[3]
+next.low.period
+
+
+```
+
+the mean of the next highest frequency is 1/7
+- this would make sense that there is a period of 7 days for CO production due to the work week being 7 days
+
+# add slightly higher frequency to model
+```{r}
+
+CO.p6 <- next.low.period
+
+# actual model
+CO.lm.top6 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) + 
+                         cos(2*pi*time.CO/CO.p1) +
+                         sin(2*pi*time.CO/CO.p2) + 
+                         cos(2*pi*time.CO/CO.p2) +
+                         sin(2*pi*time.CO/CO.p3) + 
+                         cos(2*pi*time.CO/CO.p3) +
+                         sin(2*pi*time.CO/CO.p4) + 
+                         cos(2*pi*time.CO/CO.p4) +
+                         sin(2*pi*time.CO/CO.p5) + 
+                         cos(2*pi*time.CO/CO.p5) +
+                         sin(2*pi*time.CO/CO.p6) + 
+                         cos(2*pi*time.CO/CO.p6))
+
+# model summary
+summary(CO.lm.top6)
+
+# visual inspection
+plot(CO.ts)
+lines(CO.lm.top6$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(0,100))
+lines(CO.lm.top6$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(100,200))
+lines(CO.lm.top6$fitted.values, col = "red")
+
+```
+
+# step analysis of higher frequency model
+```{r}
+# actual model
+CO.lm.step.1 <- step(CO.lm.top6)
+
+# model summary
+summary(CO.lm.step.1)
+
+# visual inspection
+plot(CO.ts)
+lines(CO.lm.step.1$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(0,100))
+lines(CO.lm.step.1$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(100,200))
+lines(CO.lm.step.1$fitted.values, col = "red")
+
+
+```
+
+# anova on two step functions
+```{r}
+anova(CO.lm.step, CO.lm.step.1)
+```
+
+There is enough evidence to reject the null at a 0.1 level, but this is not very statistically significant
+
+We will take the larger function, it follows the data more closely, and has the fluctuations we are looking for
+
+# choose a seasonal model
+```{r}
+CO.lm.seasonal <- CO.lm.step.1
+```
+
 
 # trend
 # predict the time series based on time
@@ -245,9 +356,62 @@ CO.lm.trend <- lm(CO.ts ~ time.CO)
 summary(CO.lm.trend)
 ```
 
-The p-value is 0.92 so there is not a significant trend in the data
+The p-value is 0.00092 so there is  a significant trend in the data
 
-  
+# visualize trend
+```{r}
+plot(CO.ts)
+abline(CO.lm.trend, col='red')
+```
+
+# test if adding trend to our seasonal model is worth while
+```{r}
+# the actual model
+CO.seasonal.trend <- lm(CO.ts ~ CO.lm.trend$effects + CO.lm.seasonal$effects)
+
+# visualize
+model <- CO.seasonal.trend
+plot(CO.ts)
+lines(model$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(0,100))
+lines(model$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(100,200))
+lines(model$fitted.values, col = "red")
+
+```
+
+This model is pretty good, matching some of the high points in the beginning
+
+# model the residuals
+
+# throw arima model together
+```{r}
+# find the residuals
+e.ts.CO <-ts(CO.seasonal.trend$residuals)
+
+# the arima model
+CO.residuals.auto <- auto.arima(e.ts.CO)
+
+# summary
+summary(CO.residuals.auto)
+
+```
+
+the arima model ended up being a 5,1,4 model
+
+# choose a residual model
+```{r}
+CO.residuals <- CO.residuals.auto
+```
+
+
+# combine the model to have a total model
+```{r}
+CO.seasonal.trend.residuals <- lm(CO.ts ~ CO.seasonal.trend + CO.residuals)
+```
+
 
 # max level of NO2
 ```{r}
