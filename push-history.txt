@@ -112,3 +112,17 @@ Joseph Testing Pull Request File
 
 Wed Nov 20 19:50:53 EST 2019
 Joey testing for anna
+[master e586a0e] Automatically making commit for Joey testing for anna
+ Committer: ah8wt <annahaikl@d-172-25-44-14.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 3 insertions(+)
