@@ -8,7 +8,10 @@ output:
   html_document: default
 ---
 
+<<<<<<< HEAD
 Anna's Setup
+=======
+>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
 ```{r setup, include=FALSE}
 require("knitr")
 datadir <- "/Users/annahaikl/Desktop/UVA/FALL 2019/4021/DATA/Air Quality"
@@ -19,7 +22,18 @@ library(mtsdi)
 library(MTS)
 ```
 
-# Load data and impute missing values
+```{r setup, include = FALSE}
+# Camryn Set Up
+require("knitr")
+datadir <- "/Users/camrynburley/Desktop/UVA/SYS4021/Data/AirQuality"
+sourcedir <- "/Users/camrynburley/Desktop/UVA/SYS4021/RCode"
+opts_knit$set(root.dir = sourcedir)
+library(forecast)
+library(mtsdi)
+library(MTS)
+```
+
+# Load Data and Impute Missing Values
 ```{r, warning=FALSE}
 setwd(datadir)
 
@@ -52,9 +66,8 @@ AQdata <- i$filled.dataset
 dailyAQ <- aggregate(AQdata, by=list(as.Date(airquality[,1],"%m/%d/%Y")), FUN=max)
 ```
 
-# create testing and training data
+# Create Testing and Training Data
 ```{r}
-
 # the index to split the data on
 separationIndex <- nrow(dailyAQ)-6
 
@@ -72,16 +85,14 @@ b
 c
 ```
 
-# review the data
+# Data Summary
 ```{r}
 summary(air.train)
 ```
+The data is from March 2004 through April 2005. We are modeling the ambient daily maximum carbon monoxide (CO) and nitrogen dioxide (NO2) concentrations. 
 
-Data from March 2004 - April 2005
-
-Looking at different levels of chemicals in the air
-
-# visualize the data
+# Univariate Time Series for CO
+## Visualize the Data
 ```{r}
 # create time series
 CO.ts <- ts(air.train$CO.GT.)
@@ -97,7 +108,6 @@ pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
 # acf and pacf
 acf(CO.ts)
 pacf(CO.ts)
-
 ```
 
 based on the periodogram there is not one main season, but possible multiple
@@ -105,7 +115,8 @@ based on the periodogram there is not one main season, but possible multiple
 
 No obvious trend or seasonality
 
-# grab the main periods
+## Seasonality
+### Finding Potential Periods
 ```{r}
 # sort the frequencies based on influence
 sorted.spec <- sort(pg.CO$spec, decreasing=T, index.return=T)
@@ -144,7 +155,7 @@ The top ten frequencies are about: 0.27, 0.44, and 0.2
   - would like to add one more frequency at about 0.05
     - shows up in top 20 frequencies
     
-# assign top periods to variables
+### Assign Potential Periods to Variables
 ```{r}
 # ideally these are not hard coded
 CO.p1 <- 1/.27
@@ -156,12 +167,9 @@ CO.p1
 CO.p2
 CO.p3
 CO.p4
-
-
 ```
 
-    
-# create model based on the top periods identified
+### Create Model with Potential Periods
 ```{r}
 # create time variable
 time.CO<-c(1:length(CO.ts))
@@ -180,7 +188,7 @@ CO.lm.top4 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) +
 summary(CO.lm.top4)
 ```
 
-# compare larger model with model with only first important period
+### Compare Larger Model with Model with Only First Important Period
 ```{r}
 # actual model
 CO.lm.top1 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) + 
@@ -195,13 +203,13 @@ anova(CO.lm.top1, CO.lm.top4)
 
 There is significant evidence to use the larger model
 
-# perfrom step analysis on large model
+### Stepwise Regression on Larger Model
 ```{r}
 CO.lm.step <- step(CO.lm.top4)
 summary(CO.lm.step)
 ```
 
-# visual inspection of large model
+### Visual Inspection of Larger Model
 ```{r}
 plot(CO.ts)
 lines(CO.lm.top4$fitted.values, col = "red")
@@ -215,7 +223,7 @@ lines(CO.lm.top4$fitted.values, col = "red")
 
 So the model is pretty bad, maybe we need to look at the first or second differences
 
-# visual inspection of step model
+### Visual Inspection of Step Model
 ```{r}
 plot(CO.ts)
 lines(CO.lm.step$fitted.values, col = "red")
@@ -230,10 +238,10 @@ lines(CO.lm.step$fitted.values, col = "red")
 step model also sucks
 
 Conclusion
--Use the step function because it will have the highest AIC
+-Use the step function because it has the highest AIC
 
-# trend
-# predict the time series based on time
+## Trend
+### Model Time Series Based on Time
 ```{r}
 # the actual model
 CO.lm.trend <- lm(CO.ts ~ time.CO)
@@ -244,9 +252,24 @@ summary(CO.lm.trend)
 
 The p-value is 0.92 so there is not a significant trend in the data
 
-  
+## Autoregressive and Moving Average Components
 
-# max level of NO2
+## Model Assessment 
+### Metrics
+compare models based on adjusted R2 and/or AIC
+### Diagnostics
+diagnostics of linear models of trends + seasonality and ARIMA models of residuals
+### Forecasting
+compare models based on MSE
+
+## Final Model
+
+## Diagnostics
+what problems remain in the diagnostics of the selected model?
+
+
+# Univariate Time Series for NO2
+## Visualize the Data
 ```{r}
 # create time series
 NO.ts <- ts(air.train$NO2.GT.)
@@ -260,7 +283,6 @@ pg.NO <- spec.pgram(NO.ts,spans=9,demean=T,log='no')
 # acf and pacf
 acf(NO.ts)
 pacf(NO.ts)
-
 ```
 
 No obvious trend or seasonality based on raw data
@@ -469,6 +491,7 @@ anova(NO.lm.combined, NO.lm.top5)
 #small p-value suggests that the larger model performs better
 ```
 
+<<<<<<< HEAD
 The partial-F tests suggest that the largest model, the one with 10 periods included, is the best predictor of the time series 
 
 Visually inspect step model 
@@ -487,6 +510,23 @@ Visual Inspection of the Combined Periods
 ```{r}
 plot(NO.ts)
 lines(NO.lm.combined$fitted.values, col = "blue")
+=======
+# Multivariate Time Series
+## Seasonality
+## Trend
+## Autoregressive and Moving Average Components
+### Metrics
+compare models based on adjusted R2 and/or AIC
+### Diagnostics
+diagnostics of linear models of trends + seasonality and ARIMA models of residuals
+### Forecasting
+compare models based on MSE
+
+## Final Model
+
+## Diagnostics
+what problems remain in the diagnostics of the selected model?
+>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
 
 ```
 Determine if there is a trend in the data 
@@ -494,6 +534,7 @@ Determine if there is a trend in the data
 # the actual model
 NO.lm.trend <- lm(NO.ts ~ time.NO)
 
+<<<<<<< HEAD
 # summary analysis
 summary(NO.lm.trend)
 
@@ -531,10 +572,106 @@ lines(NO.lm.combined$fitted.values, col = "red")
 
 anova(NO.trendseason, NO.lm.combined)
 ```
+=======
+# Simulation from Univariate CO Model
+```{r}
+# CO univariate model = model of data + model of residuals
+CO.uni <- CO.final + CO.resi.final # idk that this is the way to do this
+
+# simulate 1 year of daily maximum CO concentrations
+### fix this based on actual ar and ma terms
+CO.uni.sim <- arima.sim(n = 365*1, list(ar = c(CO.uni$coef[1], CO.uni$coef[2]), ma = c(CO.uni$coef[3])), sd = sqrt(CO.uni$sigma2))
+
+# make time series
+CO.uni.sim.ts <- ts(CO.uni.sim)
+```
+
+## Visualization
+```{r}
+# plot simulated values with observations
+plot(CO.ts, main = "Simulation from Univariate CO Model", col = "black")
+lines(CO.uni.sim.ts, col = "red")
+legend(0.6, 0.57, legend = c("Time Series Data", "Simulation"), col = c("black", "red"))
+```
+how does simulation compare visually with time series data?
+
+## Trend
+```{r}
+# linear model for simulation
+CO.sim.lm <- lm()
+```
+compare coefficient estimates
+>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
+
+## Seasonality
+```{r}
+# compare periodogram of observations and periodogram of simulation
+par(mfrow = c(1,2))
+pg.CO
+pg.CO.uni.sim <- spec.pgram(CO.uni.sim.ts, spans = 9, demean = T, log = 'no')
+par(mfrow = c(1,1))
+```
+compare periodograms (get periods?)
+
+## Mean and Variance
+```{r}
+# mean of observations
+mean(CO.ts)
+
+# mean of simulation
+mean(CO.uni.sim.ts)
+
+# variance of observations
+var(CO.ts)
+
+# variance of simulation
+var(CO.uni.sim.ts)
+```
+compare mean and variance
+
+## Auto-Correlation
+```{r}
+# ACF of observations
+acf(CO.ts)
+
+# ACF of simulation
+acf(CO.uni.sim.ts)
+```
+compare ACF
+
+```{r}
+# PACF of observations
+pacf(CO.ts)
+
+# PACF of simulation
+pacf(CO.uni.sim.ts)
+```
+compare PACF
+
+## Cross-Correlation
+```{r}
+# cross-correlation of observations
+cor(air.train$CO.GT.)
+
+# cross-correlation of simulation
+cor(CO.uni.sim)
+```
+compare cross-correlation
+
+# Simulation from Univariate NO2 Model
+## Visualization
+## Trend
+## Seasonality
+## Mean and Variance
+## Auto-Correlation
+## Cross-Correlation
 
 
-
-
-
-
+# Simulation from Multivariate Model
+## Visualization
+## Trend
+## Seasonality
+## Mean and Variance
+## Auto-Correlation
+## Cross-Correlation
 
