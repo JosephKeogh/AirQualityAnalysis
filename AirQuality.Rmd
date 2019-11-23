@@ -10,12 +10,11 @@ output:
 
 <<<<<<< HEAD
 ```{r setup, include=FALSE}
-=======
-<<<<<<< HEAD
-Anna's Setup
-=======
->>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
-```{r setup, include=FALSE}
+#=======
+#<<<<<<< HEAD
+#Anna's Setup
+#=======
+#>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
 require("knitr")
 datadir <- "/Users/annahaikl/Desktop/UVA/FALL 2019/4021/DATA/Air Quality"
 sourcedir <-"/Users/annahaikl/Desktop/UVA/FALL 2019/4021/CODE"
@@ -497,7 +496,7 @@ NO.pg.cutoff <- 15
 
 # the top periods
 print('top periods')
-sorted.Ts[1:NO.pg.cutoff]
+sorted.Ts.NO[1:NO.pg.cutoff]
 
 # top frequencies
 ## to double check that this makes sense based on periodogram
@@ -640,7 +639,6 @@ summary(NO.lm.top15)
 ```
 NO Model with Averaged Periods 
 ```{r}
-# actual model
 NO.lm.combined <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
                          cos(2*pi*time.NO/NO.p1) +
                          sin(2*pi*time.NO/NO.p2) + 
@@ -701,31 +699,30 @@ Visual Inspection of the Combined Periods
 ```{r}
 plot(NO.ts)
 lines(NO.lm.combined$fitted.values, col = "blue")
-=======
-# Multivariate Time Series
-## Seasonality
-## Trend
-## Autoregressive and Moving Average Components
-### Metrics
-compare models based on adjusted R2 and/or AIC
-### Diagnostics
-diagnostics of linear models of trends + seasonality and ARIMA models of residuals
-### Forecasting
-compare models based on MSE
-
-## Final Model
-
-## Diagnostics
-what problems remain in the diagnostics of the selected model?
->>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
-
 ```
+<!-- ======= -->
+<!-- # Multivariate Time Series -->
+<!-- ## Seasonality -->
+<!-- ## Trend -->
+<!-- ## Autoregressive and Moving Average Components -->
+<!-- ### Metrics -->
+<!-- compare models based on adjusted R2 and/or AIC -->
+<!-- ### Diagnostics -->
+<!-- diagnostics of linear models of trends + seasonality and ARIMA models of residuals -->
+<!-- ### Forecasting -->
+<!-- compare models based on MSE -->
+
+<!-- ## Final Model -->
+
+<!-- ## Diagnostics -->
+<!-- what problems remain in the diagnostics of the selected model? -->
+<!-- >>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5 -->
+
 Determine if there is a trend in the data 
 ```{r}
 # the actual model
 NO.lm.trend <- lm(NO.ts ~ time.NO)
 
-<<<<<<< HEAD
 # summary analysis
 summary(NO.lm.trend)
 
@@ -762,7 +759,49 @@ lines(NO.trendseason$fitted.values, col = "blue")
 lines(NO.lm.combined$fitted.values, col = "red")
 
 anova(NO.trendseason, NO.lm.combined)
+
 ```
+Decided to proceed using the model that incorporates trend and seasonality 
+
+ARIMA Model 
+```{r}
+e.ts.NO <- NO.trendseason$residuals
+acf(e.ts.NO)
+#Because there is no linear decay in the ACF then the residuals are stationary
+#cuts off after 2 lags
+pacf(e.ts.NO)
+#cuts off after 1 or 5 lags 
+```
+Make ARIMA models 
+```{r}
+NO.arima201 <- arima(e.ts.NO, order = c(2,0,1), include.mean = FALSE)
+NO.arima205 <- arima(e.ts.NO, order = c(2,0,5), include.mean = FALSE)
+
+NO.arima.auto <- auto.arima(e.ts.NO, approximation = FALSE)
+```
+
+Compare ARIMA Mdoels 
+```{r}
+#Compare Visaully 
+plot(e.ts.NO)
+lines(NO.arima201$fitted.values, col = "blue")
+lines(NO.arima205$fitted.values, col = "red")
+lines(NO.arima.auto$fitted.values, col = "green")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 =======
 # Simulation from Univariate CO Model
 ```{r}
