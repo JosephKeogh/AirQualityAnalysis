@@ -147,3 +147,17 @@ After doing this, you may fix the identity used for this commit with:
 
 Sat Nov 23 17:15:32 CST 2019
 Anna
+[master 27f6455] Automatically making commit for Anna
+ Committer: ah8wt <annahaikl@Annas-MacBook-Pro.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 67 insertions(+), 25 deletions(-)
