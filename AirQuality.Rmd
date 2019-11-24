@@ -776,17 +776,34 @@ Make ARIMA models
 ```{r}
 NO.arima201 <- arima(e.ts.NO, order = c(2,0,1), include.mean = FALSE)
 NO.arima205 <- arima(e.ts.NO, order = c(2,0,5), include.mean = FALSE)
-
 NO.arima.auto <- auto.arima(e.ts.NO, approximation = FALSE)
 ```
 
 Compare ARIMA Mdoels 
 ```{r}
-#Compare Visaully 
-plot(e.ts.NO)
-lines(NO.arima201$fitted.values, col = "blue")
-lines(NO.arima205$fitted.values, col = "red")
-lines(NO.arima.auto$fitted.values, col = "green")
+#Compare Visually - Not sure if this is a legit way of doing this
+plot(e.ts.NO, type = "line")
+lines(NO.arima201$residuals,col = "red")
+plot(e.ts.NO, type = "line")
+lines(NO.arima205$residuals,col = "blue")
+plot(e.ts.NO, type = "line")
+lines(NO.arima.auto$residuals,col = "green")
+
+#AIC
+AIC(NO.arima201)
+AIC(NO.arima205)
+AIC(NO.arima.auto)
+
+#BIC
+BIC(NO.arima201)
+BIC(NO.arima205)
+BIC(NO.arima.auto)
+
+#Diagnostics
+tsdiag(NO.arima201, gof.lag = 20)
+tsdiag(NO.arima205, gof.lag = 20)
+tsdiag(NO.arima.auto, gof.lag = 20)
+
 ```
 
 
