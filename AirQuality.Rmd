@@ -1,6 +1,6 @@
 ---
 title: "Project 2"
-author: "Camryn Burley, Anna Haikl, and Joesph Keogh"
+author: "Camryn Burley, Anna Haikl, and Joseph Keogh"
 date: "12-4-19"
 abstract: "On our honor as students, we have neither given nor received aid on this assignment."
 output:
@@ -11,10 +11,8 @@ output:
 <<<<<<< HEAD
 ```{r setup, include=FALSE}
 #=======
-#<<<<<<< HEAD
 #Anna's Setup
 #=======
-#>>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
 require("knitr")
 datadir <- "/Users/annahaikl/Desktop/UVA/FALL 2019/4021/DATA/Air Quality"
 sourcedir <-"/Users/annahaikl/Desktop/UVA/FALL 2019/4021/CODE"
@@ -26,7 +24,6 @@ library(MTS)
 
 ```{r setup, include = FALSE}
 # Camryn Set Up
->>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
 require("knitr")
 datadir <- "/Users/camrynburley/Desktop/UVA/SYS4021/Data/AirQuality"
 sourcedir <- "/Users/camrynburley/Desktop/UVA/SYS4021/RCode"
@@ -102,21 +99,21 @@ CO.ts <- ts(air.train$CO.GT.)
 
 # visualize raw data
 plot(CO.ts)
+```
+There is no extremely obvious trend from the plot of the time series. There may be some seasonality, but we are unsure as of now if this fluctuation is from seasonality or if it is random.
 
+```{r}
 # periodogram
-# this pumps out a different graph sometimes
-  # is this because it is doing fast Fourier Transfer??
 pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
+```
+Based on the periodogram, there are multiple possibilities for the period of a seasonal component. There are a few spikes, each of which indicate a possible frequency/period to explain the seasonality of the data. We predict that if the seasonality is significant in the model, it will be based on a complex wave. 
 
-# acf and pacf
+```{r}
+# ACF and PACF
 acf(CO.ts)
 pacf(CO.ts)
 ```
-
-based on the periodogram there is not one main season, but possible multiple
--if there is seasonality it will be based on a complex wave
-
-No obvious trend or seasonality
+The ACF is approximately sinusoidal. The PACF does not cut off after a certain number of lags and has some sinusoidal behavior. This indicates that there may be some autoregressive and moving average components in our model of the residuals.
 
 ## Seasonality
 ### Finding Potential Periods
@@ -128,7 +125,7 @@ sorted.spec <- sort(pg.CO$spec, decreasing=T, index.return=T)
 sorted.omegas <- pg.CO$freq[sorted.spec$ix]
 sorted.Ts <- 1/pg.CO$freq[sorted.spec$ix]
 
-# the cutoff for influencial
+# the cutoff for influential
 CO.pg.cutoff <- 5
 
 # the top periods
@@ -143,45 +140,37 @@ sorted.omegas[1:CO.pg.cutoff]
 # visual
 CO.pg.box <- boxplot(sorted.Ts[1:CO.pg.cutoff], main="Period Boxplot")
 
-# the average influencial period
+# the average influential period
 print('mean of top periods')
 CO.pg.box.mean <- CO.pg.box$stats[3]
 print(CO.pg.box.mean)
 
 # plot top periods
-plot(sorted.Ts[1:CO.pg.cutoff])
+plot(sorted.Ts[1:CO.pg.cutoff], main = "Top Periods")
 ```
+We found the frequencies of the largest spikes in the periodogram graph and converted them to periods by taking 1/the frequency. The five largest spikes correspond to periods of 384, 192, 128, 96, and 76.8 days. We considered these our "top" choices for periods to explain seasonality.  
+We are concerned that the reason we are seeing a period of 384 days is because this is close to the length of the data set and not because there is actual correlation between data values collected 384 days apart. We will investigate whether or not to use this period in the following sections.
 
-The top 5 frequencies are 
-
-    
-### Assign Potential Periods to Variables
+### Create Model with Potential Periods
+To begin, we made a model without the 384 day period but that included the other four periods.
 ```{r}
+# assign potential periods to variables
 CO.p1 <- sorted.Ts[1]
 CO.p2 <- sorted.Ts[2]
 CO.p3 <- sorted.Ts[3]
 CO.p4 <- sorted.Ts[4]
 CO.p5 <- sorted.Ts[5]
 
-CO.p1
-CO.p2
-CO.p3
-CO.p4
-<<<<<<< HEAD
-CO.p5
+# CO.p1
+# CO.p2
+# CO.p3
+# CO.p4
+# CO.p5
 
-
-=======
->>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
-```
-
-### Create Model with Potential Periods
-```{r}
 # create time variable
 time.CO<-c(1:length(CO.ts))
 
-# actual model
-## not using the first period because it is basically the entire data set
+# model
 CO.lm.top4 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p2) + 
                          cos(2*pi*time.CO/CO.p2) +
                          sin(2*pi*time.CO/CO.p3) + 
@@ -194,12 +183,12 @@ CO.lm.top4 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p2) +
 # model summary
 summary(CO.lm.top4)
 ```
+This model will be compared to a model that only uses the first "important" period (i.e. the period associated with the largest spike in the periodogram, with the exception of the one corresponding to 384 days).
 
 ### Compare Larger Model with Model with Only First Important Period
 ```{r}
 # actual model
-CO.lm.top1 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p2) + 
-                         cos(2*pi*time.CO/CO.p2))
+CO.lm.top1 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p2) + cos(2*pi*time.CO/CO.p2))
 
 # model summary
 summary(CO.lm.top1)
@@ -207,11 +196,9 @@ summary(CO.lm.top1)
 # anova
 anova(CO.lm.top1, CO.lm.top4)
 ```
+The p-value of the partial F-test is 0.0024, which is significant at the 0.05 level. We reject the null hypothesis, which means that the larger model contains at least one coefficient, not shared with the smaller model, that is significant. The larger model is better at explaining variability.
 
-
-There is significant evidence to use the larger model
-
-# include the largest period
+### Create Model with All Identified Periods
 ```{r}
 # actual model
 CO.lm.top5 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) + 
@@ -231,22 +218,9 @@ summary(CO.lm.top5)
 # compare with smaller model
 anova(CO.lm.top4, CO.lm.top5)
 ```
+We created the model that used all five periods identified from the periodogram. We compared it to the model without the 384-day period using a partial F test. The test is significant at the 0.05 level, which means there is significant evidence to use the larger model. We will use the model with all five periods to explain seasonality in further analysis.
 
-There is significant evidence to use the larger model
-
-<<<<<<< HEAD
-In my opinion the only reason we are seeing a period is because this is the length of the data set
-
-# perfrom step analysis on large model
-=======
-### Stepwise Regression on Larger Model
->>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
-```{r}
-CO.lm.step <- step(CO.lm.top5)
-summary(CO.lm.step)
-```
-
-### Visual Inspection of Larger Model
+### Visual Inspection of Model
 ```{r}
 plot(CO.ts)
 lines(CO.lm.top5$fitted.values, col = "red")
@@ -257,31 +231,10 @@ lines(CO.lm.top5$fitted.values, col = "red")
 plot(CO.ts, xlim=c(100,200))
 lines(CO.lm.top5$fitted.values, col = "red")
 ```
+We plotted the fitted values of the model in red over the graph of the time series data. We plotted the entire time series and also zoomed in to see t = [0, 100] and t = [100, 200]. The model follows the general trend of the data, but there are no small fluctuations, of which the data has many. We may need to add a term with a smaller period in order to capture these smaller fluctuations.
 
-model follows the general trend of the data
-
-no small fuctuations though, may need to add smaller frequency
-
-### Visual Inspection of Step Model
+### Explore Adding Higher Frequency Components
 ```{r}
-plot(CO.ts)
-lines(CO.lm.step$fitted.values, col = "red")
-
-plot(CO.ts, xlim=c(0,100))
-lines(CO.lm.step$fitted.values, col = "red")
-
-plot(CO.ts, xlim=c(100,200))
-lines(CO.lm.step$fitted.values, col = "red")
-```
-
-step model also follows the general trend of the data
-
-no small fluctuations though, need to possible add higher frequency components in
-
-
-# explore adding higher frequency components
-```{r}
-
 # visual for frequency
 plot(sorted.omegas, xlim=c(0,10))
 
@@ -291,19 +244,15 @@ plot(sorted.Ts, xlim=c(0,30))
 # look at the 6th through 10th most influencial periods
 next.low.period <- boxplot(sorted.Ts[6:10])$stats[3]
 next.low.period
-
-
 ```
+The average of the periods associated with the next five highest spikes of the periodogram is about 7 days. A period of around 7 days makes sense to us, as CO production could be vary weekly from people working and commuting.
 
-the mean of the next highest frequency is 1/7
-- this would make sense that there is a period of 7 days for CO production due to the work week being 7 days
-
-# add slightly higher frequency to model
+### Add New Period to Model
+We made a new model with all five periods in our previous model and the addition of the new period around 7 days.
 ```{r}
-
 CO.p6 <- next.low.period
 
-# actual model
+# model
 CO.lm.top6 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) + 
                          cos(2*pi*time.CO/CO.p1) +
                          sin(2*pi*time.CO/CO.p2) + 
@@ -329,71 +278,41 @@ lines(CO.lm.top6$fitted.values, col = "red")
 
 plot(CO.ts, xlim=c(100,200))
 lines(CO.lm.top6$fitted.values, col = "red")
-
 ```
+Upon visually inspecting this new model, we see smaller fluctuations, which we wanted. However, we do see that the peaks of the smaller waves do not consistently match up with where the data has a peak, based on the zoomed in graphs.
 
-# step analysis of higher frequency model
+### Comparison of Models
 ```{r}
-# actual model
-CO.lm.step.1 <- step(CO.lm.top6)
-
-# model summary
-summary(CO.lm.step.1)
-
-# visual inspection
-plot(CO.ts)
-lines(CO.lm.step.1$fitted.values, col = "red")
-
-plot(CO.ts, xlim=c(0,100))
-lines(CO.lm.step.1$fitted.values, col = "red")
-
-plot(CO.ts, xlim=c(100,200))
-lines(CO.lm.step.1$fitted.values, col = "red")
-
-
+anova(CO.lm.top5, CO.lm.top6)
 ```
+The p-value is 0.2364, which means we fail to reject the null hypothesis. The smaller model is better in this case, as the coefficients in the larger model (not shared with the smaller model) were not found to be significant. We will use the model with the five periods.
 
-# anova on two step functions
+### Choose Seasonal Model
 ```{r}
-anova(CO.lm.step, CO.lm.step.1)
+CO.lm.seasonal <- CO.lm.top5
 ```
-
-There is enough evidence to reject the null at a 0.1 level, but this is not very statistically significant
-
-We will take the larger function, it follows the data more closely, and has the fluctuations we are looking for
-
-# choose a seasonal model
-```{r}
-CO.lm.seasonal <- CO.lm.step.1
-```
-
-<<<<<<< HEAD
-=======
-Conclusion
--Use the step function because it has the highest AIC
->>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
+We have chosen the model with the top five identified periods to explain seasonality, as it has been shown to be better than the model with only the 192-day period and the model which also included a 7-day period.
 
 ## Trend
 ### Model Time Series Based on Time
 ```{r}
-# the actual model
+# model
 CO.lm.trend <- lm(CO.ts ~ time.CO)
 
 # summary analysis
 summary(CO.lm.trend)
 ```
+The p-value is 0.00097 so there is  a significant trend in the data.
 
-The p-value is 0.00092 so there is  a significant trend in the data
-
-# visualize trend
+### Visualize Trend
 ```{r}
 plot(CO.ts)
 abline(CO.lm.trend, col='red')
 ```
 
-# test if adding trend to our seasonal model is worth while
+### Model Trend and Seasonality Together
 ```{r}
-# the actual model
+# model
 CO.seasonal.trend <- lm(CO.ts ~ CO.lm.trend$effects + CO.lm.seasonal$effects)
 
 # visualize
@@ -406,45 +325,31 @@ lines(model$fitted.values, col = "red")
 
 plot(CO.ts, xlim=c(100,200))
 lines(model$fitted.values, col = "red")
-
 ```
+Based on visual inspection, this model, including both trend and seasonality, is pretty good. It is especially good at modeling the data at the beginning of the time series. After that, while the peaks are not of the same magnitude as those of the data, they occur at relatively the same x-value. 
 
-This model is pretty good, matching some of the high points in the beginning
-
-# model the residuals
-
-# throw arima model together
+## Model Residuals
+### ARIMA model
+Based on the ACF and PACF (shown earlier), we predict there will be autoregressive and moving average terms. We used the auto.arima function to determine if this was correct and to find the p and q values.
 ```{r}
-# find the residuals
+# get residuals
 e.ts.CO <-ts(CO.seasonal.trend$residuals)
 
-# the arima model
+# arima model
 CO.residuals.auto <- auto.arima(e.ts.CO)
 
 # summary
 summary(CO.residuals.auto)
-
 ```
+The ARIMA model is a 5,1,4 model. This means that there are autoregressive and moving average terms, where p = 5 and q = 4. Also, d = 1, meaning that the first differences were used to ensure stationarity, which is a key assumption to modeling the residuals.
 
-the arima model ended up being a 5,1,4 model
-
-# choose a residual model
+### Choose Model for Residuals
 ```{r}
 CO.residuals <- CO.residuals.auto
 ```
 
-
-# combine the model to have a total model
-```{r}
-CO.seasonal.trend.residuals <- lm(CO.ts ~ CO.seasonal.trend + CO.residuals)
-```
-
-<<<<<<< HEAD
-=======
-## Autoregressive and Moving Average Components
->>>>>>> 11dbd217fd08c69da234c627fc3762d5f7691332
-
 ## Model Assessment 
+do for 5 and 6 period trend/seasonality models and again for ARIMA models (need to predict values for p,d,q to compare to auto.arima)
 ### Metrics
 compare models based on adjusted R2 and/or AIC
 ### Diagnostics
@@ -453,6 +358,7 @@ diagnostics of linear models of trends + seasonality and ARIMA models of residua
 compare models based on MSE
 
 ## Final Model
+The final model includes a trend and seasonality, using 5 different periods. The ARIMA model of the residuals is a 5,1,4 model.
 
 ## Diagnostics
 what problems remain in the diagnostics of the selected model?
@@ -848,7 +754,6 @@ how does simulation compare visually with time series data?
 CO.sim.lm <- lm()
 ```
 compare coefficient estimates
->>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
 
 ## Seasonality
 ```{r}
