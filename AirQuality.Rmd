@@ -108,13 +108,6 @@ pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
 ```
 Based on the periodogram, there are multiple possibilities for the period of a seasonal component. There are a few spikes, each of which indicate a possible frequency/period to explain the seasonality of the data. We predict that if the seasonality is significant in the model, it will be based on a complex wave. 
 
-```{r}
-# ACF and PACF
-acf(CO.ts)
-pacf(CO.ts)
-```
-The ACF is approximately sinusoidal. The PACF does not cut off after a certain number of lags and has some sinusoidal behavior. This indicates that there may be some autoregressive and moving average components in our model of the residuals.
-
 ## Seasonality
 ### Finding Potential Periods
 ```{r}
@@ -279,19 +272,8 @@ lines(CO.lm.top6$fitted.values, col = "red")
 plot(CO.ts, xlim=c(100,200))
 lines(CO.lm.top6$fitted.values, col = "red")
 ```
-Upon visually inspecting this new model, we see smaller fluctuations, which we wanted. However, we do see that the peaks of the smaller waves do not consistently match up with where the data has a peak, based on the zoomed in graphs.
-
-### Comparison of Models
-```{r}
-anova(CO.lm.top5, CO.lm.top6)
-```
-The p-value is 0.2364, which means we fail to reject the null hypothesis. The smaller model is better in this case, as the coefficients in the larger model (not shared with the smaller model) were not found to be significant. We will use the model with the five periods.
-
-### Choose Seasonal Model
-```{r}
-CO.lm.seasonal <- CO.lm.top5
-```
-We have chosen the model with the top five identified periods to explain seasonality, as it has been shown to be better than the model with only the 192-day period and the model which also included a 7-day period.
+Upon visually inspecting this new model, we see smaller fluctuations, which we wanted. However, we do see that the peaks of the smaller waves do not consistently match up with where the data has a peak, based on the zoomed in graphs.  
+After determining if there is a significant trend, we will compare the potential trend and seasonality models with five and 6 periods, to determine which one will comprise our final linear model.
 
 ## Trend
 ### Model Time Series Based on Time
@@ -310,58 +292,190 @@ plot(CO.ts)
 abline(CO.lm.trend, col='red')
 ```
 
-### Model Trend and Seasonality Together
+### Model Comparison: Trend and Seasonality Together
 ```{r}
-# model
-CO.seasonal.trend <- lm(CO.ts ~ CO.lm.trend$effects + CO.lm.seasonal$effects)
+# model with trend and 5 periods
+CO.seasonal5.trend <- lm(CO.ts ~ CO.lm.trend$effects + CO.lm.top5$effects)
 
-# visualize
-model <- CO.seasonal.trend
+# model with trend and 6 periods 
+CO.seasonal6.trend <- lm(CO.ts ~ CO.lm.trend$effects + CO.lm.top6$effects)
+```
+
+#### Visual Comparison
+```{r}
+
+model1 <- CO.seasonal5.trend
 plot(CO.ts)
-lines(model$fitted.values, col = "red")
+lines(model1$fitted.values, col = "red")
 
 plot(CO.ts, xlim=c(0,100))
-lines(model$fitted.values, col = "red")
+lines(model1$fitted.values, col = "red")
 
-plot(CO.ts, xlim=c(100,200))
-lines(model$fitted.values, col = "red")
+model2 <- CO.seasonal6.trend
+plot(CO.ts)
+lines(model2$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(0,100))
+lines(model2$fitted.values, col = "red")
 ```
-Based on visual inspection, this model, including both trend and seasonality, is pretty good. It is especially good at modeling the data at the beginning of the time series. After that, while the peaks are not of the same magnitude as those of the data, they occur at relatively the same x-value. 
+Based on visual inspection, both models are pretty good, especially at modeling the data at the beginning of the time series. After that, while the peaks are not of the same magnitude as those of the data, they occur at relatively the same x-value in both plots. The differences in the models are slight, which makes it difficult to determine the best one by eye. 
+
+#### Comparison Using Metrics
+```{r}
+# Adjusted R^2: model with trend and 5 periods
+summary(CO.seasonal5.trend)$adj.r.squared
+
+# AIC: model with trend and 5 periods
+AIC(CO.seasonal5.trend)
+
+# Adjusted R^2: model with trend and 6 periods
+summary(CO.seasonal6.trend)$adj.r.squared
+
+# AIC: model with trend and 6 periods
+AIC(CO.seasonal6.trend)
+```
+The adjusted R^2 of the model that includes the trend and 5 periods is 0.258. The adjusted R^2 of the model that includes the trend and 6 periods is 0.259. Based on adjusted R^2, we would select the model with 6 periods, though they are very close based on this metric and neither value is particularly close to 1.  
+The AIC of the model with 5 periods is 1474.224. The AIC of the model with 6 periods is 1473.733. Based on AIC, we would choose the model with 6 periods, because it has the smaller AIC value. Again, the values are very similar, though.
+
+#### Diagnostics
+**Residuals vs. Fitted**
+```{r}
+plot(CO.seasonal5.trend, which = 1)
+plot(CO.seasonal6.trend, which = 1)
+```
+The mean of the residuals is not 0 and the variance is not constant for either model. The relationship evident in the plots indicates a lack of fit.
+
+\pagebreak
+**QQ Plot**
+```{r}
+plot(CO.seasonal5.trend, which = 2)
+plot(CO.seasonal6.trend, which = 2)
+```
+The residuals are approximately normal for both models, though the tails show some deviation from normality.
+
+\pagebreak
+**Scale-Location Plot**
+```{r}
+plot(CO.seasonal5.trend, which = 3)
+plot(CO.seasonal6.trend, which = 3)
+```
+The data appears to be clustered together in both plots, and the mean is not centered at 0.
+
+\pagebreak
+**Residuals vs. Leverage**
+```{r}
+plot(CO.seasonal5.trend, which = 5)
+plot(CO.seasonal6.trend, which = 5)
+```
+In both plots, there is one point, which is the same data point, with a Cook's distance larger than 1. There is also one shared point that has a Cook's distance of approximately 0.5.
+
+\pagebreak
+```{r}
+# plot Cook's distances
+plot(CO.seasonal5.trend,labels.id = NULL, which = 4)
+plot(CO.seasonal6.trend,labels.id = NULL, which = 4)
+```
+These plots show that it is the same two points for each model with high Cook's distances.
+
+Both models perform very similarly in the diagnostics.
+
+### Choose Seasonal Model
+```{r}
+CO.lm.seasonal <- CO.lm.top6
+```
+We have chosen the model with the trend and top six identified periods to explain seasonality, as it performed better than the model with trend and five periods in Adjusted R^2 and AIC. Since the diagnostics for both models were similar, these criteria were used to make the decision.
 
 ## Model Residuals
-### ARIMA model
-Based on the ACF and PACF (shown earlier), we predict there will be autoregressive and moving average terms. We used the auto.arima function to determine if this was correct and to find the p and q values.
+### ACF and PACF
+```{r}
+# ACF and PACF
+acf(CO.ts)
+pacf(CO.ts)
+```
+The ACF is approximately sinusoidal. The PACF does not cut off after a certain number of lags and has some sinusoidal behavior. We predict that there will be autoregressive and moving average terms in the model of the residuals.  
+Based on the PACF, potential values for p for the autoregressive portion of the model are 4 and 8.  
+Based on the ACF, potential values for q for the moving average portion of the model are 4 and 11.  
+Additionally, we are unsure of the stationarity of the data, as we know there is a trend and the ACF appears to have some linear decay at the very beginning. This is a key assumption that must be met, so we will test models using the time series itself (d = 0) and the first differences (d = 1).
+
+### ARIMA Models
+We tested the possible combinations of our p, d, and q values.
 ```{r}
 # get residuals
 e.ts.CO <-ts(CO.seasonal.trend$residuals)
 
-# arima model
+# 4, 0, 4
+CO.arima404 <- arima(e.ts.CO, order = c(4,0,4), include.mean = FALSE)
+summary(CO.arima404)
+# AIC = 1389.47
+
+# 4, 0, 11
+CO.arima4011 <- arima(e.ts.CO, order = c(4,0,11), include.mean = FALSE)
+summary(CO.arima4011)
+# AIC = 1387.91
+
+# 4, 1, 4
+CO.arima414 <- arima(e.ts.CO, order = c(4,1,4), include.mean = FALSE)
+summary(CO.arima414)
+# AIC = 1394.41
+
+# 4, 1, 11
+CO.arima4111 <- arima(e.ts.CO, order = c(4,1,11), include.mean = FALSE)
+summary(CO.arima4111)
+# AIC = 1393.15
+
+# 8, 0, 4
+CO.arima804 <- arima(e.ts.CO, order = c(8,0,4), include.mean = FALSE)
+summary(CO.arima804)
+# AIC = 1373.65
+
+# 8, 0, 11
+CO.arima8011 <- arima(e.ts.CO, order = c(8,0,11), include.mean = FALSE)
+summary(CO.arima8011)
+# AIC = 1369.56 
+# NaNs produced
+
+# 8, 1, 4
+# CO.arima814 <- arima(e.ts.CO, order = c(8,1,4), include.mean = FALSE)
+# summary(CO.arima814)
+# produced errors, so was not included 
+
+# 8, 1, 11
+CO.arima8111 <- arima(e.ts.CO, order = c(8,1,11), include.mean = FALSE)
+summary(CO.arima8111)
+# AIC = 1375.45
+# NaNs produced
+```
+Based on AIC, the two best models are the ARIMA(4,0,11) and ARIMA(8,0,4) models.
+
+After testing the possible values of p, d, and q that we identified, we also used the auto.arima function to generate another model.
+```{r}
+# auto.arima model
 CO.residuals.auto <- auto.arima(e.ts.CO)
 
 # summary
 summary(CO.residuals.auto)
 ```
-The ARIMA model is a 5,1,4 model. This means that there are autoregressive and moving average terms, where p = 5 and q = 4. Also, d = 1, meaning that the first differences were used to ensure stationarity, which is a key assumption to modeling the residuals.
+The ARIMA model is a 5,1,4 model. This means that there are autoregressive and moving average terms, where p = 5 and q = 4. Also, d = 1, meaning that the first differences were used to ensure stationarity, which is a key assumption to modeling the residuals. The AIC for this model is 1396.76.
+
+### Diagnostics
+```{r}
+tsdiag(CO.arima4011, gof.lag = 20)
+tsdiag(CO.arima804, gof.lag = 20)
+tsdiag(CO.residuals.auto, gof.lag = 20)
+```
+The model that performs the best in diagnostics is the ARIMA(4,0,11) model. It has the most points with high p-values in the Ljung-Box statistic plot. Both of the other models see their p-values decrease as the lag increases.
 
 ### Choose Model for Residuals
 ```{r}
-CO.residuals <- CO.residuals.auto
+CO.residuals <- CO.arima4011
 ```
 
-## Model Assessment 
-do for 5 and 6 period trend/seasonality models and again for ARIMA models (need to predict values for p,d,q to compare to auto.arima)
-### Metrics
-compare models based on adjusted R2 and/or AIC
-### Diagnostics
-diagnostics of linear models of trends + seasonality and ARIMA models of residuals
-### Forecasting
-compare models based on MSE
-
 ## Final Model
-The final model includes a trend and seasonality, using 5 different periods. The ARIMA model of the residuals is a 5,1,4 model.
+The final model includes a trend and seasonality, using 6 different periods (384, 192, 128, 96, 76.8, and 7.11 days). The ARIMA model of the residuals is a 4,0,11 model.
 
 ## Diagnostics
-what problems remain in the diagnostics of the selected model?
+The residuals of the trend and seasonality linear model appear relatively normal, from the QQ plot; however, problems remain with the residuals vs. fitted and scale-location plots, indicating violation of assumptions and lack of fit. There are also two points with high Cook's distances. In the future, models should address these problems.
+The diagnostic plot for the model of the residuals does not have problems. The p-value for the Ljung-Box stastic is above the dashed line for all of the points and approaches 1 for many of the points. The model of the residuals is adequate for up to 20 lags.
 
 
 # Univariate Time Series for NO2
@@ -622,7 +736,6 @@ lines(NO.lm.combined$fitted.values, col = "blue")
 
 <!-- ## Diagnostics -->
 <!-- what problems remain in the diagnostics of the selected model? -->
-<!-- >>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5 -->
 
 Determine if there is a trend in the data 
 ```{r}
@@ -713,12 +826,11 @@ tsdiag(NO.arima.auto, gof.lag = 20)
 ```
 
 
-
-
-
-
-
-
+## Model Assessment 
+### Metrics
+compare models based on adjusted R2 and/or AIC
+### Diagnostics
+diagnostics of linear models of trends + seasonality and ARIMA models of residuals
 
 
 
@@ -809,6 +921,9 @@ cor(air.train$CO.GT.)
 cor(CO.uni.sim)
 ```
 compare cross-correlation
+
+# Forecasting
+compare univariate and multivariate models based on MSE and visually
 
 # Simulation from Univariate NO2 Model
 ## Visualization
