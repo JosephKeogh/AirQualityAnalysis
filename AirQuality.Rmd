@@ -934,7 +934,7 @@ compare univariate and multivariate models visually and based on MSE
 # Simulation from Univariate CO Model
 ```{r}
 # CO univariate model = model of data + model of residuals
-CO.uni <- CO.final + CO.resi.final # idk that this is the way to do this
+CO.uni <- CO.lm + CO.residuals # idk that this is the way to do this
 
 # simulate 1 year of daily maximum CO concentrations
 ### fix this based on actual ar and ma terms
