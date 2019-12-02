@@ -8,7 +8,6 @@ output:
   html_dCOument: default
 ---
 
-<<<<<<< HEAD
 ```{r setup, include=FALSE}
 #=======
 #Anna's Setup
@@ -273,7 +272,7 @@ plot(CO.ts, xlim=c(100,200))
 lines(CO.lm.top6$fitted.values, col = "red")
 ```
 Upon visually inspecting this new model, we see smaller fluctuations, which we wanted. However, we do see that the peaks of the smaller waves do not consistently match up with where the data has a peak, based on the zoomed in graphs.  
-After determining if there is a significant trend, we will compare the potential trend and seasonality models with five and 6 periods, to determine which one will comprise our final linear model.
+After determining if there is a significant trend, we will compare the potential trend and seasonality models with five and 6 periods to determine which one will comprise our final linear model.
 
 ## Trend
 ### Model Time Series Based on Time
@@ -284,7 +283,7 @@ CO.lm.trend <- lm(CO.ts ~ time.CO)
 # summary analysis
 summary(CO.lm.trend)
 ```
-The p-value is 0.00097 so there is  a significant trend in the data.
+The p-value is 0.00097, so there is a significant trend in the data.
 
 ### Visualize Trend
 ```{r}
@@ -379,9 +378,9 @@ These plots show that it is the same two points for each model with high Cook's 
 
 Both models perform very similarly in the diagnostics.
 
-### Choose Seasonal Model
+### Choose Trend + Seasonal Model
 ```{r}
-CO.lm.seasonal <- CO.lm.top6
+CO.lm <- CO.seasonal6.trend
 ```
 We have chosen the model with the trend and top six identified periods to explain seasonality, as it performed better than the model with trend and five periods in Adjusted R^2 and AIC. Since the diagnostics for both models were similar, these criteria were used to make the decision.
 
@@ -401,48 +400,48 @@ Additionally, we are unsure of the stationarity of the data, as we know there is
 We tested the possible combinations of our p, d, and q values.
 ```{r}
 # get residuals
-e.ts.CO <-ts(CO.seasonal.trend$residuals)
+e.ts.CO <-ts(CO.lm$residuals)
 
 # 4, 0, 4
 CO.arima404 <- arima(e.ts.CO, order = c(4,0,4), include.mean = FALSE)
 summary(CO.arima404)
-# AIC = 1389.47
+# AIC = 1391.31
 
 # 4, 0, 11
 CO.arima4011 <- arima(e.ts.CO, order = c(4,0,11), include.mean = FALSE)
 summary(CO.arima4011)
-# AIC = 1387.91
+# AIC = 1386.82
 
 # 4, 1, 4
 CO.arima414 <- arima(e.ts.CO, order = c(4,1,4), include.mean = FALSE)
 summary(CO.arima414)
-# AIC = 1394.41
+# AIC = 1396.22
 
 # 4, 1, 11
 CO.arima4111 <- arima(e.ts.CO, order = c(4,1,11), include.mean = FALSE)
 summary(CO.arima4111)
-# AIC = 1393.15
+# AIC = 1392.74
 
 # 8, 0, 4
 CO.arima804 <- arima(e.ts.CO, order = c(8,0,4), include.mean = FALSE)
 summary(CO.arima804)
-# AIC = 1373.65
+# AIC = 1374.6
 
 # 8, 0, 11
 CO.arima8011 <- arima(e.ts.CO, order = c(8,0,11), include.mean = FALSE)
 summary(CO.arima8011)
-# AIC = 1369.56 
-# NaNs produced
+# AIC = 1391.05
 
 # 8, 1, 4
-# CO.arima814 <- arima(e.ts.CO, order = c(8,1,4), include.mean = FALSE)
-# summary(CO.arima814)
-# produced errors, so was not included 
+CO.arima814 <- arima(e.ts.CO, order = c(8,1,4), include.mean = FALSE)
+summary(CO.arima814)
+# AIC = 1378.37
+# NaNs produced
 
 # 8, 1, 11
 CO.arima8111 <- arima(e.ts.CO, order = c(8,1,11), include.mean = FALSE)
 summary(CO.arima8111)
-# AIC = 1375.45
+# AIC = 1379.06
 # NaNs produced
 ```
 Based on AIC, the two best models are the ARIMA(4,0,11) and ARIMA(8,0,4) models.
@@ -455,7 +454,7 @@ CO.residuals.auto <- auto.arima(e.ts.CO)
 # summary
 summary(CO.residuals.auto)
 ```
-The ARIMA model is a 5,1,4 model. This means that there are autoregressive and moving average terms, where p = 5 and q = 4. Also, d = 1, meaning that the first differences were used to ensure stationarity, which is a key assumption to modeling the residuals. The AIC for this model is 1396.76.
+The ARIMA model is a 1,1,1 model. This means that there are autoregressive and moving average terms, where p = 1 and q = 1. Also, d = 1, meaning that the first differences were used to ensure stationarity, which is a key assumption to modeling the residuals. The AIC for this model is 1397.12.
 
 ### Diagnostics
 ```{r}
@@ -486,23 +485,20 @@ NO.ts <- ts(air.train$NO2.GT.)
 
 # visualize raw data
 plot(NO.ts)
+```
+There appears to be an increasing trend, especially after about t = 150. There is also the potential for seasonality, but this fluctuation could be random.
 
+```{r}
 # periodogram
 pg.NO <- spec.pgram(NO.ts,spans=9,demean=T,log='no')
-
-# acf and pacf
-acf(NO.ts)
-pacf(NO.ts)
 ```
+Based on the periodogram, there are multiple possibilities for the period of a seasonal component. There are fewer spikes than the periodogram for CO. There are still spikes, though, each of which indicate a possible frequency/period to explain the seasonality of the data. We predict that if the seasonality is significant in the model, it will be based on a complex wave.
 
-No obvious trend or seasonality based on raw data
-
-based on periodogram there may be some seasonlity, but it is going to be based on complex waves
-
-Determine if there is seasonality in the data
+## Seasonality
+### Finding Potential Periods
 ```{r}
 # sort the frequencies based on influence
-sorted.spec.NO <- sort(pg.NO$spec, decreasing=T, index.return=T)
+sorted.spec.NO <- sort(pg.NO$spec, decreasing = T, index.return=T)
 
 # convert to periods
 sorted.omegas.NO <- pg.NO$freq[sorted.spec.NO$ix]
@@ -510,9 +506,8 @@ sorted.Ts.NO <- 1/pg.NO$freq[sorted.spec.NO$ix]
 
 plot(sorted.Ts.NO, xlim = c(1,20))
 
-# the cutoff for influencial
+# the cutoff for influential
 NO.pg.cutoff <- 15
-
 
 # the top periods
 print('top periods')
@@ -526,20 +521,18 @@ sorted.omegas.NO[1:NO.pg.cutoff]
 # visual
 NO.pg.box <- boxplot(sorted.Ts.NO[1:NO.pg.cutoff], main="Period Boxplot")
 
-# the average influencial period
+# the average influential period
 print('mean of top periods')
 NO.pg.box.mean <- NO.pg.box$stats[3]
 print(NO.pg.box.mean)
 ```
+We found the frequencies of the largest spikes in the periodogram graph and converted them to periods by taking 1/the frequency. The 15 largest spikes corresponded to periods ranging from 6.62 to 384 days. We considered these our "top" choices for periods to explain seasonality.  
+The average influential period can be interpreted as on average, the seasons have a period of 48 days.
 
-The average influencial period can be interpreted as on average the seasons have a period of 48 days
-
-The top 15 periods range from 6.62 to 384 days
-
-The top 15 frequencies range from 0.0026 to 0.15
-    
-Assign top periods to variables
+### Create Models with Potential Periods
+We created models with the top 3, 5, 10, and 15 periods, to determine which was best to explain the seasonality of the data. We also created a model that used a period that was the average of several other periods that were close together.
 ```{r}
+# assign top periods to variables
 NO.p1 <- sorted.Ts.NO[1]
 NO.p2 <- sorted.Ts.NO[2]
 NO.p3 <- sorted.Ts.NO[3]
@@ -558,14 +551,14 @@ NO.p15 <- sorted.Ts.NO[15]
 
 NO.pavg1 <- mean(c(sorted.Ts.NO[8],sorted.Ts.NO[9], sorted.Ts.NO[10], sorted.Ts.NO[11]))
 NO.pavg2 <- mean(c(sorted.Ts.NO[12],sorted.Ts.NO[13], sorted.Ts.NO[14], sorted.Ts.NO[15]))
-```
 
-NO Model for top 3 Periods
-```{r}
 # create time variable
 time.NO<-c(1:length(NO.ts))
+```
 
-# actual model
+Model with Top 3 Periods
+```{r}
+# model
 NO.lm.top3 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
                          cos(2*pi*time.NO/NO.p1) +
                          sin(2*pi*time.NO/NO.p2) + 
@@ -576,9 +569,10 @@ NO.lm.top3 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) +
 # model summary
 summary(NO.lm.top3)
 ```
-NO Model for top 5 Periods
+
+Model with Top 5 Periods
 ```{r}
-# actual model
+# model
 NO.lm.top5 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
                          cos(2*pi*time.NO/NO.p1) +
                          sin(2*pi*time.NO/NO.p2) + 
@@ -593,9 +587,10 @@ NO.lm.top5 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) +
 # model summary
 summary(NO.lm.top5)
 ```
-NO Model for top 10 Periods
+
+Model with Top 10 Periods
 ```{r}
-# actual model
+# model
 NO.lm.top10 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
                          cos(2*pi*time.NO/NO.p1) +
                          sin(2*pi*time.NO/NO.p2) + 
@@ -620,9 +615,10 @@ NO.lm.top10 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) +
 # model summary
 summary(NO.lm.top10)
 ```
-NO Model for top 15 Periods
+
+Model with Top 15 Periods
 ```{r}
-# actual model
+# model
 NO.lm.top15 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
                          cos(2*pi*time.NO/NO.p1) +
                          sin(2*pi*time.NO/NO.p2) + 
@@ -657,7 +653,8 @@ NO.lm.top15 <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) +
 # model summary
 summary(NO.lm.top15)
 ```
-NO Model with Averaged Periods 
+
+Model with Averaged Periods 
 ```{r}
 NO.lm.combined <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) + 
                          cos(2*pi*time.NO/NO.p1) +
@@ -682,77 +679,53 @@ NO.lm.combined <- lm(NO.ts ~ sin(2*pi*time.NO/NO.p1) +
 summary(NO.lm.combined)
 ```
 
-Model Comparison
+### Model Comparison
 ```{r}
 anova(NO.lm.top3, NO.lm.top5)
-#small p-value suggests that the larger model performs better than the smaller model 
+# small p-value suggests that the larger model performs better than the smaller model 
 
 anova(NO.lm.top5, NO.lm.top10)
-#small p-value suggests that the larger model performs better than the smaller model 
+# small p-value suggests that the larger model performs better than the smaller model 
 
 anova(NO.lm.top10, NO.lm.top15)
-#large p-value suggests that the smaller model performs better 
+# large p-value suggests that the smaller model performs better 
 
 anova(NO.lm.top10, NO.lm.combined)
-#large p-value suggests that the smaller model performs better 
-
-anova(NO.lm.combined, NO.lm.top5)
-#small p-value suggests that the larger model performs better
+# large p-value suggests that the smaller model performs better 
 ```
+The partial F tests suggest that the model that includes the top 10 periods is better than the models with 3, 5, and 15 periods. The partial F test also suggests that the model with the averaged periods is better than the model with the top 10 periods. Both of these models will be further compared through metrics and diagnostics later, after we determine if there is a significant trend to be included.
 
-<<<<<<< HEAD
-The partial-F tests suggest that the largest model, the one with 10 periods included, is the best predictor of the time series 
-
-Visually inspect step model 
 ```{r}
+# visualize
 plot(NO.ts)
-lines(NO.lm.top3$fitted.values, col = "red")
-lines(NO.lm.top5$fitted.values, col = "blue")
-lines(NO.lm.top10$fitted.values, col = "green")
-lines(NO.lm.combined$fitted.values, col = "orange")
-
-legend(0, 350, legend = c("Top 3 Periods", "Top 5 Periods", "Top 10 Periods", "Combined Periods"), col = c("red", "blue", "green", "orange"), lwd = 1)
-```
-The graph suggests that the model that contains the combined periods is the best predictor
-
-Visual Inspection of the Combined Periods 
-```{r}
-plot(NO.ts)
+lines(NO.lm.top10$fitted.values, col = "red")
 lines(NO.lm.combined$fitted.values, col = "blue")
+
+legend(0, 350, legend = c("Top 10 Periods", "Combined Periods"), col = c("red", "blue"), lwd = 1)
 ```
-<!-- ======= -->
-<!-- # Multivariate Time Series -->
-<!-- ## Seasonality -->
-<!-- ## Trend -->
-<!-- ## Autoregressive and Moving Average Components -->
-<!-- ### Metrics -->
-<!-- compare models based on adjusted R2 and/or AIC -->
-<!-- ### Diagnostics -->
-<!-- diagnostics of linear models of trends + seasonality and ARIMA models of residuals -->
-<!-- ### Forecasting -->
-<!-- compare models based on MSE -->
+Upon visual inspection, both models get the basic shape of the time series correct, though the model with the averaged periods has smaller fluctuations that may better match the actual data. 
 
-<!-- ## Final Model -->
-
-<!-- ## Diagnostics -->
-<!-- what problems remain in the diagnostics of the selected model? -->
-
-Determine if there is a trend in the data 
+## Trend
+### Model Time Series Based on Time
 ```{r}
-# the actual model
+# trend model
 NO.lm.trend <- lm(NO.ts ~ time.NO)
 
 # summary analysis
 summary(NO.lm.trend)
+```
+The p-value is significant at the 0.05 level, which means that the trend is significant. 
 
+### Visualize Trend
+```{r}
 plot(time.NO, NO.ts, type = "l")
 abline(NO.lm.trend, col = "red")
 ```
-This shows that there is a trend in the data 
 
-Make a combined model of seasonality and trend 
+### Model Comparison: Trend and Seasonality Together
 ```{r}
-NO.trendseason <- lm(NO.ts ~ time.NO + sin(2*pi*time.NO/NO.p1) + 
+# model with trend + averaged periods
+NO.seasonalavg.trend <- lm(NO.ts ~ time.NO + sin(2*pi*time.NO/NO.p1) + 
                          cos(2*pi*time.NO/NO.p1) +
                          sin(2*pi*time.NO/NO.p2) + 
                          cos(2*pi*time.NO/NO.p2) +
@@ -771,73 +744,193 @@ NO.trendseason <- lm(NO.ts ~ time.NO + sin(2*pi*time.NO/NO.p1) +
                          sin(2*pi*time.NO/NO.pavg2) + 
                          cos(2*pi*time.NO/NO.pavg2))
 
-summary(NO.trendseason)
+# model with trend + 10 periods
+NO.seasonal10.trend <- lm(NO.ts ~ time.NO + sin(2*pi*time.NO/NO.p1) + 
+                         cos(2*pi*time.NO/NO.p1) +
+                         sin(2*pi*time.NO/NO.p2) + 
+                         cos(2*pi*time.NO/NO.p2) +
+                         sin(2*pi*time.NO/NO.p3) + 
+                         cos(2*pi*time.NO/NO.p3) +
+                         sin(2*pi*time.NO/NO.p4) + 
+                         cos(2*pi*time.NO/NO.p4) +
+                         sin(2*pi*time.NO/NO.p5) + 
+                         cos(2*pi*time.NO/NO.p5) +
+                         sin(2*pi*time.NO/NO.p6) + 
+                         cos(2*pi*time.NO/NO.p6) +
+                         sin(2*pi*time.NO/NO.p7) + 
+                         cos(2*pi*time.NO/NO.p7) +
+                         sin(2*pi*time.NO/NO.p8) + 
+                         cos(2*pi*time.NO/NO.p8) +
+                         sin(2*pi*time.NO/NO.p9) + 
+                         cos(2*pi*time.NO/NO.p9) +
+                         sin(2*pi*time.NO/NO.p10) + 
+                         cos(2*pi*time.NO/NO.p10))
+```
 
+#### Visual Comparison
+```{r}
 plot(NO.ts)
-lines(NO.trendseason$fitted.values, col = "blue")
-lines(NO.lm.combined$fitted.values, col = "red")
-
-anova(NO.trendseason, NO.lm.combined)
-
+lines(NO.seasonalavg.trend$fitted.values, col = "blue")
+lines(NO.seasonal10.trend$fitted.values, col = "red")
 ```
-Decided to proceed using the model that incorporates trend and seasonality 
+Based on visual inspection, the model with the averaged periods appears to better capture the fluctuations of the data, though both models match the general trend of the data.
 
-ARIMA Model 
+#### Comparison Using Metrics
 ```{r}
-e.ts.NO <- NO.trendseason$residuals
-acf(e.ts.NO)
-#Because there is no linear decay in the ACF then the residuals are stationary
-#cuts off after 2 lags
-pacf(e.ts.NO)
-#cuts off after 1 or 5 lags 
+# Adjusted R^2: model with trend and averaged periods
+summary(NO.seasonalavg.trend)$adj.r.squared
+
+# AIC: model with trend and averaged periods
+AIC(NO.seasonalavg.trend)
+
+# Adjusted R^2: model with trend and 10 periods
+summary(NO.seasonal10.trend)$adj.r.squared
+
+# AIC: model with trend and 10 periods
+AIC(NO.seasonal10.trend)
 ```
-Make ARIMA models 
+The adjusted R^2 of the model that includes the trend and averaged periods is 0.5622. The adjusted R^2 of the model that includes the trend and 10 periods is 0.5621. Based on adjusted R^2, the models are essentially equivalent.  
+The AIC of the model with averaged periods is 3821.945. The AIC of the model with 10 periods is 3823.9. Based on AIC, we would choose the model with averaged periods, because it has the smaller AIC value. The values are very similar, though.
+
+#### Diagnostics
+**Residuals vs. Fitted**
 ```{r}
-NO.arima201 <- arima(e.ts.NO, order = c(2,0,1), include.mean = FALSE)
-NO.arima205 <- arima(e.ts.NO, order = c(2,0,5), include.mean = FALSE)
-NO.arima.auto <- auto.arima(e.ts.NO, approximation = FALSE)
+plot(NO.seasonalavg.trend, which = 1)
+plot(NO.seasonal10.trend, which = 1)
 ```
+The mean of the residuals is approximately 0 and has fairly even spread above and below the x-axis for both models.
 
-Compare ARIMA Mdoels 
+\pagebreak
+**QQ Plot**
 ```{r}
-#Compare Visually - Not sure if this is a legit way of doing this
-plot(e.ts.NO, type = "line")
-lines(NO.arima201$residuals,col = "red")
-plot(e.ts.NO, type = "line")
-lines(NO.arima205$residuals,col = "blue")
-plot(e.ts.NO, type = "line")
-lines(NO.arima.auto$residuals,col = "green")
-
-#AIC
-AIC(NO.arima201)
-AIC(NO.arima205)
-AIC(NO.arima.auto)
-
-#BIC
-BIC(NO.arima201)
-BIC(NO.arima205)
-BIC(NO.arima.auto)
-
-#Diagnostics
-tsdiag(NO.arima201, gof.lag = 20)
-tsdiag(NO.arima205, gof.lag = 20)
-tsdiag(NO.arima.auto, gof.lag = 20)
-
+plot(NO.seasonalavg.trend, which = 2)
+plot(NO.seasonal10.trend, which = 2)
 ```
+The residuals are approximately normal for both models, though the tails show some deviation from normality. The model with averaged periods appears to have slightly more normal residuals at the tails.
 
+\pagebreak
+**Scale-Location Plot**
+```{r}
+plot(NO.seasonalavg.trend, which = 3)
+plot(NO.seasonal10.trend, which = 3)
+```
+While the mean is not centered at 0 for either plot, there appears to be relatively good spread in both plots.
 
-## Model Assessment 
-### Metrics
-compare models based on adjusted R2 and/or AIC
+\pagebreak
+**Residuals vs. Leverage**
+```{r}
+plot(NO.seasonalavg.trend, which = 5)
+plot(NO.seasonal10.trend, which = 5)
+```
+Neither plot has any points with Cook's distances greater than 0.5.
+
+\pagebreak
+```{r}
+# plot Cook's distances
+plot(NO.seasonalavg.trend,labels.id = NULL, which = 4)
+plot(NO.seasonal10.trend,labels.id = NULL, which = 4)
+```
+Both models have low Cook's distances for all points.
+
+Both models perform very similarly in the diagnostics.
+
+### Choose Trend + Seasonal Model
+```{r}
+NO.lm <- NO.seasonalavg.trend
+```
+We have chosen the model with the trend and averaged periods to explain seasonality, as it performed slightly better than the model with trend and 10 periods in AIC, as well as being preferred after the partial F test. Since the diagnostics for both models were similar, AIC and the partial F test were used to make the decision.
+
+## Model Residuals
+### ACF and PACF
+```{r}
+# ACF and PACF
+acf(NO.ts)
+pacf(NO.ts)
+```
+The ACF has somewhat sinusoidal behavior and is significant for all 25 lags in view on the plot. There does not appear to be linear decay in the ACF, suggesting that the time series is stationary and the first differences do not need to be taken to meet the stationarity assumption.  
+The PACF does not cut off after a certain number of lags and also has somewhat sinusoidal behavior. We predict that there will be autoregressive and moving average terms in the model of the residuals.  
+Based on the PACF, potential values for p for the autoregressive portion of the model are 4 and 8.  
+Based on the ACF, potential values for q for the moving average portion of the model are 5 and 11. 
+
+### ARIMA Models
+We tested the possible combinations of our p and q values.
+```{r}
+# get residuals
+e.ts.NO <-ts(NO.lm$residuals)
+
+# 4, 0, 5
+NO.arima405 <- arima(e.ts.NO, order = c(4,0,5), include.mean = FALSE)
+summary(NO.arima405)
+# AIC = 3659.71
+
+# 4, 0, 11
+NO.arima4011 <- arima(e.ts.NO, order = c(4,0,11), include.mean = FALSE)
+summary(NO.arima4011)
+# AIC = 3636.05
+
+# 8, 0, 5
+NO.arima805 <- arima(e.ts.NO, order = c(8,0,5), include.mean = FALSE)
+summary(NO.arima805)
+# AIC = 3656.34
+# NaNs produced
+
+# 8, 0, 11
+NO.arima8011 <- arima(e.ts.NO, order = c(8,0,11), include.mean = FALSE)
+summary(NO.arima8011)
+# produced an error, so was not included
+```
+Based on AIC, the two best models are the ARIMA(4,0,5) and ARIMA(4,0,11) models.
+
+After testing the possible values of p and q that we identified, we also used the auto.arima function to generate another model.
+```{r}
+# auto.arima model
+NO.residuals.auto <- auto.arima(e.ts.NO)
+
+# summary
+summary(NO.residuals.auto)
+```
+The ARIMA model is a 1,0,0 model. This means that there are autoregressive terms, where p = 1, but no moving average terms, since q = 0. Also, d = 0, meaning that the time series is stationary, which is a key assumption to modeling the residuals. The AIC for this model is 3725.46.
+
 ### Diagnostics
-diagnostics of linear models of trends + seasonality and ARIMA models of residuals
+```{r}
+tsdiag(NO.arima405, gof.lag = 20)
+tsdiag(NO.arima4011, gof.lag = 20)
+tsdiag(NO.residuals.auto, gof.lag = 20)
+```
+The model that performs the best in diagnostics is the ARIMA(4,0,11) model. It has the most points with high p-values in the Ljung-Box statistic plot. Both of the other models have fewer points with high p-values, meaning that the model is adequate up to fewer lags.
+
+### Choose Model for Residuals
+```{r}
+NO.residuals <- NO.arima4011
+```
+This model has the lowest AIC and also the best diagnostic plot of the models considered.
+
+## Final Model
+The final model includes a trend and seasonality, using 9 different periods, two of which are the averages of 4 similar periods each. The ARIMA model of the residuals is a 4,0,11 model.
+
+## Diagnostics
+The residuals of the trend and seasonality linear model appear relatively normal, from the QQ plot. There are no points with high Cook's distances. The residuals vs. fitted and scale-location plots have minor problems; they could have more even spread and a mean even closer to zero, but overall they look good. In the future, another model could be identified that performs even better in regard to these diagnostics.  
+In the diagnostic plot for the model of the residuals, the p-value for the Ljung-Box stastic is above the dashed line for 15 of the 20 lags, meaning that the model of the residuals is adequate for up to 15 lags. A future model could work to extend the model adequacy to all 20 lags of the plot.
+
+# Multivariate Time Series
+## Seasonality and Trends
+We used the same linear models for the seasonality and trends that we discovered in our analysis of the univariate time series for CO and NO2. See above for how we modeled seasonal components and trends to produce these linear models.
+
+## Autoregressive and Moving Average Terms
+## Models
+## Model Comparison
+### Metrics
+### Diagnostics
+(mask the output of tested models whose diagnostics you don't discuss using include = FALSE)
+## Final Model
+## Diagnostics
+what problems remain in the diagnostics of the final model?
 
 
+# Forecasting
+compare univariate and multivariate models visually and based on MSE
 
 
-
-
-=======
 # Simulation from Univariate CO Model
 ```{r}
 # CO univariate model = model of data + model of residuals
@@ -922,8 +1015,6 @@ cor(CO.uni.sim)
 ```
 compare cross-correlation
 
-# Forecasting
-compare univariate and multivariate models based on MSE and visually
 
 # Simulation from Univariate NO2 Model
 ## Visualization
@@ -941,4 +1032,3 @@ compare univariate and multivariate models based on MSE and visually
 ## Mean and Variance
 ## Auto-Correlation
 ## Cross-Correlation
-
