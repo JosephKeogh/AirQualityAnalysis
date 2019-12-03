@@ -413,6 +413,20 @@ These plots show that all of the points have small Cook's distances for both mod
 
 Both models perform very similarly in the diagnostics.
 
+### testing another method
+```{r}
+CO.test <- lm(CO.ts ~ CO.lm.trend$effects + CO.seasonal6.trend$effects)
+
+# plot the test
+model1 <- CO.test
+plot(CO.ts)
+lines(model1$fitted.values, col = "red")
+
+plot(CO.ts, xlim=c(0,100))
+lines(model1$fitted.values, col = "red")
+```
+
+
 ### Choose Trend + Seasonal Model
 ```{r}
 CO.lm <- CO.seasonal5.trend
