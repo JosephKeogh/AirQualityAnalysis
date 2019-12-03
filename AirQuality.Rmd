@@ -413,20 +413,6 @@ These plots show that all of the points have small Cook's distances for both mod
 
 Both models perform very similarly in the diagnostics.
 
-### testing another method
-```{r}
-CO.test <- lm(CO.ts ~ CO.lm.trend$effects + CO.seasonal6.trend$effects)
-
-# plot the test
-model1 <- CO.test
-plot(CO.ts)
-lines(model1$fitted.values, col = "red")
-
-plot(CO.ts, xlim=c(0,100))
-lines(model1$fitted.values, col = "red")
-```
-
-
 ### Choose Trend + Seasonal Model
 ```{r}
 CO.lm <- CO.seasonal5.trend
@@ -495,11 +481,15 @@ Based on AIC, the two best models are the ARIMA(7,0,9) and ARIMA(7,1,9) models.
 
 After testing the possible values of p, d, and q that we identified, we also used the auto.arima function to generate another model.
 ```{r}
+#todo unsure about whether the auto.arima function should be run on a ts or just the residuals, CO.residuals.auto.two is the later of the two options
 # auto.arima model
 CO.residuals.auto <- auto.arima(e.ts.CO)
+CO.residuals.auto.two <- auto.arima(CO.lm$residuals, approximation = FALSE)
 
 # summary
 summary(CO.residuals.auto)
+
+summary(CO.residuals.auto.two)
 ```
 The ARIMA model is a 5,0,2 model. This means that there are autoregressive and moving average terms, where p = 5 and q = 2. Also, d = 0, meaning that the first differences were not needed to ensure stationarity, which is a key assumption to modeling the residuals. The AIC for this model is 1413.39.
 
@@ -522,12 +512,53 @@ The final model includes a trend and seasonality, using 5 different periods (384
 ### create the final model
 ```{r}
 
+# do you have to simulate becaues the arima model is random?
+
+# quick fix to allow their code to work with ours
+e.Tmin.lm <- CO.residuals
+
+# simulate the arima values
+e.CO.sim <- arima.sim(50, 
+                      list(
+                            ar=c(
+                                e.Tmin.lm$coef[1],e.Tmin.lm$coef[2],e.Tmin.lm$coef[3],
+                                e.Tmin.lm$coef[4],e.Tmin.lm$coef[5],e.Tmin.lm$coef[6],
+                                e.Tmin.lm$coef[7]
+                              ), 
+                            ma=c(
+                              e.Tmin.lm$coef[8],e.Tmin.lm$coef[9],e.Tmin.lm$coef[10],
+                              e.Tmin.lm$coef[11],e.Tmin.lm$coef[12],e.Tmin.lm$coef[13],
+                              e.Tmin.lm$coef[14],e.Tmin.lm$coef[15],e.Tmin.lm$coef[16]
+                              )
+                             ), 
+                            sd=sqrt(e.Tmin.lm$sigma2)
+                          )
+
+# the next time variable
+# this will need to be changed based on what we are predicting
+# right now doing 50 days
+next.time.time <- c(1:(50))
+next.time <- data.frame(time.CO = next.time.time)
+
+# the mean prediction of the linear model based on the next times
+CO.mean <- predict(CO.lm, newdata=next.time)
+
+# view the prediction
+plot(CO.residuals + CO.mean, type = 'l', col='cyan')
 ```
 
 
 ## Diagnostics
 The residuals of the trend and seasonality linear model appear relatively normal, excluding the lower tail, from the QQ plot; however, problems remain with the residuals vs. fitted plot, indicating lack of fit. In the future, models should address problems with the normality in the lower tail and the lack of fit.
 The diagnostic plot for the model of the residuals does not have problems. The p-value for the Ljung-Box stastic is above the dashed line for all 20 lags, meaning the model is adequate for at least up to 20 lags. Future work could focus on increasing the number of lags for which the model is considered adequate.
+
+
+
+
+
+
+
+
 
 
 # Univariate Time Series for NO2
