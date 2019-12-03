@@ -32,6 +32,19 @@ library(mtsdi)
 library(MTS)
 ```
 
+
+```{r}
+# Joey Set Up
+require("knitr")
+datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/AirQualityData"
+sourcedir <-"C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Code"
+opts_knit$set(root.dir = sourcedir)
+library(forecast)
+library(mtsdi)
+library(MTS)
+```
+
+
 # Load Data and Impute Missing Values
 ```{r, warning=FALSE}
 setwd(datadir)
@@ -492,6 +505,12 @@ CO.residuals <- CO.arima719
 ## Final Model
 The final model includes a trend and seasonality, using 5 different periods (384, 192, 128, 96, and 76.8 days). The ARIMA model of the residuals is a 7,1,9 model.
 
+### create the final model
+```{r}
+
+```
+
+
 ## Diagnostics
 The residuals of the trend and seasonality linear model appear relatively normal, excluding the lower tail, from the QQ plot; however, problems remain with the residuals vs. fitted plot, indicating lack of fit. In the future, models should address problems with the normality in the lower tail and the lack of fit.
 The diagnostic plot for the model of the residuals does not have problems. The p-value for the Ljung-Box stastic is above the dashed line for all 20 lags, meaning the model is adequate for at least up to 20 lags. Future work could focus on increasing the number of lags for which the model is considered adequate.
@@ -947,9 +966,23 @@ This model has the lowest AIC and also the best diagnostic plot of the models co
 ## Final Model
 The final model includes a trend and seasonality, using 9 different periods, two of which are the averages of 4 similar periods each. The ARIMA model of the residuals is a 3,1,11 model.
 
+### Create the final Model
+```{r}
+
+```
+
 ## Diagnostics
 The residuals of the trend and seasonality linear model appear relatively normal, from the QQ plot. There are no points with high Cook's distances. The residuals vs. fitted and scale-location plots have minor problems; they could have more even spread and a mean even closer to zero, but overall they look good. In the future, another model could be identified that performs even better in regard to these diagnostics.  
 In the diagnostic plot for the model of the residuals, the p-value for the Ljung-Box stastic is above the dashed line for 15 of the 20 lags, meaning that the model of the residuals is adequate for up to 15 lags. A future model could work to extend the model adequacy to all 20 lags of the plot.
+
+
+
+
+
+
+
+
+
 
 # Multivariate Time Series
 ## Seasonality and Trends
