@@ -990,6 +990,7 @@ The residuals of the trend and seasonality linear model appear relatively normal
 In the diagnostic plot for the model of the residuals, the p-value for the Ljung-Box stastic is above the dashed line for 15 of the 20 lags, meaning that the model of the residuals is adequate for up to 15 lags. A future model could work to extend the model adequacy to all 20 lags of the plot.
 
 
+<<<<<<< HEAD
 
 
 
@@ -999,12 +1000,15 @@ In the diagnostic plot for the model of the residuals, the p-value for the Ljung
 
 
 #### Multivariate Time Series
+=======
+# Multivariate Time Series
+>>>>>>> a10e3dad640a27996d6bf5f7c87cccd930e58bee
 ## Seasonality and Trends
 We used the same linear models for the seasonality and trends that we discovered in our analysis of the univariate time series for CO and NO2. See above for how we modeled seasonal components and trends to produce these linear models.  
 The ARMA models for the residuals of both time series use d = 0, meaning that both meet the stationarity assumption without taking the first differences.
 
 ## Autoregressive and Moving Average Terms
-In our univariate models, the residuals for CO were modeled with an ARIMA(7,1,9) model and the residuals for NO2 were modeled with an ARIMA(3,1,11) model. There were autoregressive and moving average terms in both cases. Since there were different p and q values used to model the residuals for each time series, it is difficult to use the ACF and PACF to determine values for p and q for the multivariate model. Because of this, we will test models with p from 1 to xx and q from 0 to xx to determine the best VARMA model.
+In our univariate models, the residuals for CO were modeled with an ARIMA(7,1,9) model and the residuals for NO2 were modeled with an ARIMA(3,1,11) model. There were autoregressive and moving average terms in both cases. Since there were different p and q values used to model the residuals for each time series, it is difficult to use the ACF and PACF to determine values for p and q for the multivariate model. Because of this, we will test models with p from 1 to 7 and q from 0 to 11 to determine the best VARMA model.
 
 ## Models
 ```{r}
@@ -1012,20 +1016,53 @@ In our univariate models, the residuals for CO were modeled with an ARIMA(7,1,9)
 allResiduals <- data.frame(CO.lm$residuals, NO.lm$residuals)
 
 # Build VARMA models
-AICmatrix <- matrix(NA, 4, 12)
-for(p in 1:4){
-  for(q in 0:11){
+
+# p from 1 to 3, q from 0 to 7
+AICmatrix1 <- matrix(NA, 3, 8)
+for(p in 1:3) {
+  for(q in 0:7) {
     varma.model <- VARMACpp(allResiduals, p=p, q=q, include.mean=F)
-    AICmatrix[p,q+1] <- varma.model$aic
+    AICmatrix1[p,q+1] <- varma.model$aic
   }
 }
+
+# p from 1 to 3, q from 9 to 11
+AICmatrix2 <- matrix(NA, 3, 3)
+for(p in 1:3) {
+  for(q in 9:11) {
+    varma.model <- VARMACpp(allResiduals, p=p, q=q, include.mean=F)
+    AICmatrix2[p,q+1] <- varma.model$aic
+  }
+}
+
+# p from 4 to 7, q from 0 to 8
+AICmatrix3 <- matrix(NA, 4, 9)
+for(p in 4:7) {
+  for(q in 0:8) {
+    varma.model <- VARMACpp(allResiduals, p=p, q=q, include.mean=F)
+    AICmatrix3[p,q+1] <- varma.model$aic
+  }
+}
+
+# p from 4 to 7, q from 9 to 11
+AICmatrix4 <- matrix(NA, 4, 3)
+for(p in 4:7) {
+  for(q in 9:11) {
+    varma.model <- VARMACpp(allResiduals, p=p, q=q, include.mean=F)
+    AICmatrix4[p,q+1] <- varma.model$aic
+  }
+}
+
 ```
 
 ## Model Comparison
 ### Metrics
 ```{r}
 # get AIC matrix
-AICmatrix
+AICmatrix1
+AICmatrix2
+AICmatrix3
+AICmatrix4
 ```
 The two models with the lowest AIC values are VARMA(p,q) and VARMA(p,q) with an AIC of xx and xx, respectively.
 
