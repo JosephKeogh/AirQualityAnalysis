@@ -956,7 +956,7 @@ Based on AIC, the two best models are the ARIMA(7,0,11) and ARIMA(3,1,11) models
 After testing the possible values of p and q that we identified, we also used the auto.arima function to generate another model.
 ```{r}
 # auto.arima model
-NO.residuals.auto <- auto.arima(e.ts.NO)
+NO.residuals.auto <- auto.arima(e.ts.NO, approximation =FALSE)
 
 # summary
 summary(NO.residuals.auto)
@@ -998,7 +998,7 @@ In the diagnostic plot for the model of the residuals, the p-value for the Ljung
 
 
 
-# Multivariate Time Series
+#### Multivariate Time Series
 ## Seasonality and Trends
 We used the same linear models for the seasonality and trends that we discovered in our analysis of the univariate time series for CO and NO2. See above for how we modeled seasonal components and trends to produce these linear models.  
 The ARMA models for the residuals of both time series use d = 0, meaning that both meet the stationarity assumption without taking the first differences.
@@ -1160,3 +1160,88 @@ compare cross-correlation
 ## Mean and Variance
 ## Auto-Correlation
 ## Cross-Correlation
+
+#### Bonus 
+
+# Create forecasts
+Forecast for CO 
+```{r}
+E_Y.pred.CO <- predict(CO.lm, newdata=air.test$CO.GT.)
+e_t.pred.CO <- forecast(CO.residuals, h=7)
+CO.forecast <- E_Y.pred.CO + e_t.pred.CO$mean
+```
+
+Forecast for NO2 
+```{r}
+E_Y.pred.NO <- predict(NO.lm, newdata=air.test$CO.GT.)
+e_t.pred.NO <- forecast(NO.residuals, h=7)
+NO.forecast <- E_Y.pred.NO + e_t.pred.NO$mean
+```
+
+Forecast for CO and NO2 
+```{r}
+CO.NO.forecast <- VARMApred(CO.NO.residuals, h=7)
+
+e_t.pred.CO.multi <- CO.NO.forecast$pred[,1]
+e_t.pred.CO.lower <- CO.NO.forecast$pred[,1] - 1.96*CO.NO.forecast$se.err[,1]
+e_t.pred.CO.upper <- CO.NO.forecast$pred[,1] + 1.96*CO.NO.forecast$se.err[,1]
+CO.multi.forecast<- E_Y.pred.CO + e_t.pred.CO.multi
+
+e_t.pred.NO.multi <- CO.NO.forecast$pred[,2]
+e_t.pred.NO.lower <- CO.NO.forecast$pred[,2] - 1.96*CO.NO.forecast$se.err[,2]
+e_t.pred.NO.upper <- CO.NO.forecast$pred[,2] + 1.96*CO.NO.forecast$se.err[,2]
+NO.multi.forecast <- E_Y.pred.NO + e_t.pred.NO.multi
+
+```
+
+# MSE 
+
+```{r}
+#CO MSE
+mean((CO.forecast-air.test$CO.GT.)^2)
+
+#NO MSE
+mean((NO.forecast-air.test$NO2.GT.)^2)
+
+#CO and NO MSE
+mean((CO.multi.forecast-air.test$CO.GT.)^2)
+mean((NO.multi.forecast-air.test$NO2.GT.)^2)
+```
+
+
+# Visually 
+```{r}
+#CO Uni plot 
+# Plot actual values and predicted values
+plot(ts(air.test$CO.GT.),type='o',ylim=c(25,60))
+lines(ts(CO.forecast),col='red',type='o')
+lines(1:6, E_Y.pred.CO + e_t.pred.CO$lower[,2], col = "red", lty = "dashed")
+lines(1:6, E_Y.pred.CO + e_t.pred.CO$upper[,2], col = "red", lty = "dashed")
+legend(1,60, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red")) 
+
+#NO Uni Plot 
+plot(ts(air.test$NO.GT.),type='o',ylim=c(25,60))
+lines(ts(NO.forecast),col='red',type='o')
+lines(1:6, E_Y.pred.NO + e_t.pred.NO$lower[,2], col = "red", lty = "dashed")
+lines(1:6, E_Y.pred.NO + e_t.pred.NO$upper[,2], col = "red", lty = "dashed")
+legend(1,60, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red")) 
+
+#Multi Plot 
+par(mfrow=c(1,2))
+# CO forecasts
+plot(ts(air.test$CO.GT.),type='o',ylim=c(20,65))
+lines(ts(CO.multi.forecast),col='red',type='o')
+lines(1:6, E_Y.pred.CO + e_t.pred.CO.lower, col = "red", lty = "dashed")
+lines(1:6, E_Y.pred.CO + e_t.pred.CO.upper, col = "red", lty = "dashed")
+legend(1,60, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
+
+#NO forecasts
+plot(ts(air.test$NO2.GT.),type='o',ylim=c(40,85))
+lines(ts(NO.multi.forecast),col='red',type='o')
+lines(1:6, E_Y.pred.NO + e_t.pred.NO.lower, col = "red", lty = "dashed")
+lines(1:6, E_Y.pred.NO + e_t.pred.NO.upper, col = "red", lty = "dashed")
+legend(1,80, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
+
+```
+
+
