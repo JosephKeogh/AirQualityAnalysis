@@ -414,8 +414,8 @@ acf(CO.ts)
 pacf(CO.ts)
 ```
 The ACF is approximately sinusoidal. The PACF does not cut off after a certain number of lags and has some sinusoidal behavior. We predict that there will be autoregressive and moving average terms in the model of the residuals.  
-Based on the PACF, potential values for p for the autoregressive portion of the model are 4 and 8.  
-Based on the ACF, potential values for q for the moving average portion of the model are 4 and 11.  
+Based on the PACF, potential values for p for the autoregressive portion of the model are 1 and 7.  
+Based on the ACF, potential values for q for the moving average portion of the model are 3 and 9.  
 Additionally, we are unsure of the stationarity of the data, as we know there is a trend and the ACF appears to have some linear decay at the very beginning. This is a key assumption that must be met, so we will test models using the time series itself (d = 0) and the first differences (d = 1).
 
 ### ARIMA Models
@@ -424,51 +424,47 @@ We tested the possible combinations of our p, d, and q values.
 # get residuals
 e.ts.CO <-ts(CO.lm$residuals)
 
-# 4, 0, 4
-CO.arima404 <- arima(e.ts.CO, order = c(4,0,4), include.mean = FALSE)
-summary(CO.arima404)
-# AIC = 1416.88
+# 1, 0, 3
+CO.arima103 <- arima(e.ts.CO, order = c(1,0,3), include.mean = FALSE)
+summary(CO.arima103)
+# AIC = 1439.4
 
-# 4, 0, 11
-CO.arima4011 <- arima(e.ts.CO, order = c(4,0,11), include.mean = FALSE)
-summary(CO.arima4011)
-# AIC = 1390.05
+# 1, 0, 9
+CO.arima109 <- arima(e.ts.CO, order = c(1,0,9), include.mean = FALSE)
+summary(CO.arima109)
+# AIC = 1408.98
 
-# 4, 1, 4
-CO.arima414 <- arima(e.ts.CO, order = c(4,1,4), include.mean = FALSE)
-summary(CO.arima414)
-# AIC = 1429.07
-# NaNs produced
+# 1, 1, 3
+CO.arima113 <- arima(e.ts.CO, order = c(1,1,3), include.mean = FALSE)
+summary(CO.arima113)
+# AIC = 1442.08
 
-# 4, 1, 11
-CO.arima4111 <- arima(e.ts.CO, order = c(4,1,11), include.mean = FALSE)
-summary(CO.arima4111)
-# AIC = 1416.34
+# 1, 1, 9
+CO.arima119 <- arima(e.ts.CO, order = c(1,1,9), include.mean = FALSE)
+summary(CO.arima119)
+# AIC = 1432.01
 
-# 8, 0, 4
-CO.arima804 <- arima(e.ts.CO, order = c(8,0,4), include.mean = FALSE)
-summary(CO.arima804)
-# AIC = 1404.2
+# 7, 0, 3
+CO.arima703 <- arima(e.ts.CO, order = c(7,0,3), include.mean = FALSE)
+summary(CO.arima703)
+# AIC = 1418.29
 
-# 8, 0, 11
-CO.arima8011 <- arima(e.ts.CO, order = c(8,0,11), include.mean = FALSE)
-summary(CO.arima8011)
-# AIC = 1346.45
-# NaNs produced
+# 7, 0, 9
+CO.arima709 <- arima(e.ts.CO, order = c(7,0,9), include.mean = FALSE)
+summary(CO.arima709)
+# AIC = 1377.67
 
-# 8, 1, 4
-CO.arima814 <- arima(e.ts.CO, order = c(8,1,4), include.mean = FALSE)
-summary(CO.arima814)
-# AIC = 1415.88
-# NaNs produced
+# 7, 1, 3
+CO.arima713 <- arima(e.ts.CO, order = c(7,1,3), include.mean = FALSE)
+summary(CO.arima713)
+# AIC = 1429.61
 
-# 8, 1, 11
-CO.arima8111 <- arima(e.ts.CO, order = c(8,1,11), include.mean = FALSE)
-summary(CO.arima8111)
-# AIC = 1373.4
-# NaNs produced
+# 7, 1, 9
+CO.arima719 <- arima(e.ts.CO, order = c(7,1,9), include.mean = FALSE)
+summary(CO.arima719)
+# AIC = 1392.05
 ```
-Based on AIC, the two best models are the ARIMA(4,0,11) and ARIMA(8,0,4) models.
+Based on AIC, the two best models are the ARIMA(7,0,9) and ARIMA(7,1,9) models.
 
 After testing the possible values of p, d, and q that we identified, we also used the auto.arima function to generate another model.
 ```{r}
@@ -482,23 +478,23 @@ The ARIMA model is a 5,0,2 model. This means that there are autoregressive and m
 
 ### Diagnostics
 ```{r}
-tsdiag(CO.arima4011, gof.lag = 20)
-tsdiag(CO.arima804, gof.lag = 20)
+tsdiag(CO.arima709, gof.lag = 20)
+tsdiag(CO.arima719, gof.lag = 20)
 tsdiag(CO.residuals.auto, gof.lag = 20)
 ```
-The model that performs the best in diagnostics is the ARIMA(4,0,11) model. It has the most points with high p-values in the Ljung-Box statistic plot. Both of the other models see their p-values decrease sooner as the lag increases.
+The model that performs the best in diagnostics is the ARIMA(7,1,9) model. It has the most points with high p-values in the Ljung-Box statistic plot. Both of the other models see their p-values decrease sooner as the lag increases.
 
 ### Choose Model for Residuals
 ```{r}
-CO.residuals <- CO.arima4011
+CO.residuals <- CO.arima719
 ```
 
 ## Final Model
-The final model includes a trend and seasonality, using 5 different periods (384, 192, 128, 96, and 76.8 days). The ARIMA model of the residuals is a 4,0,11 model.
+The final model includes a trend and seasonality, using 5 different periods (384, 192, 128, 96, and 76.8 days). The ARIMA model of the residuals is a 7,1,9 model.
 
 ## Diagnostics
 The residuals of the trend and seasonality linear model appear relatively normal, excluding the lower tail, from the QQ plot; however, problems remain with the residuals vs. fitted plot, indicating lack of fit. In the future, models should address problems with the normality in the lower tail and the lack of fit.
-The diagnostic plot for the model of the residuals does not have problems. The p-value for the Ljung-Box stastic is above the dashed line for 17 lags, meaning the model is adequate for up to 17 lags. Future work could focus on increasing the number of lags for which the model is considered adequate.
+The diagnostic plot for the model of the residuals does not have problems. The p-value for the Ljung-Box stastic is above the dashed line for all 20 lags, meaning the model is adequate for at least up to 20 lags. Future work could focus on increasing the number of lags for which the model is considered adequate.
 
 
 # Univariate Time Series for NO2
@@ -871,10 +867,10 @@ We have chosen the model with the trend and averaged periods to explain seasonal
 acf(NO.ts)
 pacf(NO.ts)
 ```
-The ACF has somewhat sinusoidal behavior and is significant for all 25 lags in view on the plot. There does not appear to be linear decay in the ACF, suggesting that the time series is stationary and the first differences do not need to be taken to meet the stationarity assumption.  
+The ACF has somewhat sinusoidal behavior and is significant for all 25 lags in view on the plot. The first few lags could be seen as having linear decay, suggesting that the time series may not be stationary and the first differences may need to be taken to meet the stationarity assumption. Values for d of 0 and 1 will be tested in potential models.  
 The PACF does not cut off after a certain number of lags and also has somewhat sinusoidal behavior. We predict that there will be autoregressive and moving average terms in the model of the residuals.  
-Based on the PACF, potential values for p for the autoregressive portion of the model are 4 and 8.  
-Based on the ACF, potential values for q for the moving average portion of the model are 5 and 11. 
+Based on the PACF, potential values for p for the autoregressive portion of the model are 3 and 7.  
+Based on the ACF, potential values for q for the moving average portion of the model are 4 and 11. 
 
 ### ARIMA Models
 We tested the possible combinations of our p and q values.
@@ -882,28 +878,47 @@ We tested the possible combinations of our p and q values.
 # get residuals
 e.ts.NO <-ts(NO.lm$residuals)
 
-# 4, 0, 5
-NO.arima405 <- arima(e.ts.NO, order = c(4,0,5), include.mean = FALSE)
-summary(NO.arima405)
-# AIC = 3659.71
-
-# 4, 0, 11
-NO.arima4011 <- arima(e.ts.NO, order = c(4,0,11), include.mean = FALSE)
-summary(NO.arima4011)
-# AIC = 3636.05
-
-# 8, 0, 5
-NO.arima805 <- arima(e.ts.NO, order = c(8,0,5), include.mean = FALSE)
-summary(NO.arima805)
-# AIC = 3656.34
+# 3, 0, 4
+NO.arima304 <- arima(e.ts.NO, order = c(3,0,4), include.mean = FALSE)
+summary(NO.arima304)
 # NaNs produced
 
-# 8, 0, 11
-NO.arima8011 <- arima(e.ts.NO, order = c(8,0,11), include.mean = FALSE)
-summary(NO.arima8011)
-# produced an error, so was not included
+# 3, 0, 11
+NO.arima3011 <- arima(e.ts.NO, order = c(3,0,11), include.mean = FALSE)
+summary(NO.arima3011)
+# NaNs produced
+
+# 3, 1, 4
+NO.arima314 <- arima(e.ts.NO, order = c(3,1,4), include.mean = FALSE)
+summary(NO.arima314)
+# AIC = 3708.73
+
+# 3, 1, 11
+NO.arima3111 <- arima(e.ts.NO, order = c(3,1,11), include.mean = FALSE)
+summary(NO.arima3111)
+# AIC = 3699.85
+
+# 7, 0, 4
+NO.arima704 <- arima(e.ts.NO, order = c(7,0,4), include.mean = FALSE)
+summary(NO.arima704)
+# NaNs produced
+
+# 7, 0, 11
+NO.arima7011 <- arima(e.ts.NO, order = c(7,0,11), include.mean = FALSE)
+summary(NO.arima7011)
+# AIC = 3669.33
+
+# 7, 1, 4
+NO.arima714 <- arima(e.ts.NO, order = c(7,1,4), include.mean = FALSE)
+summary(NO.arima714)
+# NaNs produced
+
+# 7, 1, 11
+NO.arima7111 <- arima(e.ts.NO, order = c(7,1,11), include.mean = FALSE)
+summary(NO.arima7111)
+# NaNs produced
 ```
-Based on AIC, the two best models are the ARIMA(4,0,5) and ARIMA(4,0,11) models.
+Based on AIC, the two best models are the ARIMA(7,0,11) and ARIMA(3,1,11) models.
 
 After testing the possible values of p and q that we identified, we also used the auto.arima function to generate another model.
 ```{r}
@@ -917,20 +932,20 @@ The ARIMA model is a 1,0,0 model. This means that there are autoregressive terms
 
 ### Diagnostics
 ```{r}
-tsdiag(NO.arima405, gof.lag = 20)
-tsdiag(NO.arima4011, gof.lag = 20)
+tsdiag(NO.arima7011, gof.lag = 20)
+tsdiag(NO.arima3111, gof.lag = 20)
 tsdiag(NO.residuals.auto, gof.lag = 20)
 ```
-The model that performs the best in diagnostics is the ARIMA(4,0,11) model. It has the most points with high p-values in the Ljung-Box statistic plot. Both of the other models have fewer points with high p-values, meaning that the model is adequate up to fewer lags.
+The model that performs the best in diagnostics is the ARIMA(3,1,11) model. It has the most points with high p-values in the Ljung-Box statistic plot. The ARIMA(7,0,11) model performed similarly on the diagnostic, but the ARIMA(3,1,11) model was slightly better. Both models performed significantly better than the auto-generated model, meaning that that model was adequate up to fewer lags.
 
 ### Choose Model for Residuals
 ```{r}
-NO.residuals <- NO.arima4011
+NO.residuals <- NO.arima3111
 ```
 This model has the lowest AIC and also the best diagnostic plot of the models considered.
 
 ## Final Model
-The final model includes a trend and seasonality, using 9 different periods, two of which are the averages of 4 similar periods each. The ARIMA model of the residuals is a 4,0,11 model.
+The final model includes a trend and seasonality, using 9 different periods, two of which are the averages of 4 similar periods each. The ARIMA model of the residuals is a 3,1,11 model.
 
 ## Diagnostics
 The residuals of the trend and seasonality linear model appear relatively normal, from the QQ plot. There are no points with high Cook's distances. The residuals vs. fitted and scale-location plots have minor problems; they could have more even spread and a mean even closer to zero, but overall they look good. In the future, another model could be identified that performs even better in regard to these diagnostics.  
@@ -942,7 +957,7 @@ We used the same linear models for the seasonality and trends that we discovered
 The ARMA models for the residuals of both time series use d = 0, meaning that both meet the stationarity assumption without taking the first differences.
 
 ## Autoregressive and Moving Average Terms
-In our univariate models, the residuals for CO and NO2 were both modeled with an ARMA(4,0,11) model. There were autoregressive and moving average terms in both cases. Because of this, we will test models with p from 1 to 4 and q from 0 to 11, in order to determine the best VARMA model.
+In our univariate models, the residuals for CO were modeled with an ARIMA(7,1,9) model and the residuals for NO2 were modeled with an ARIMA(3,1,11) model. There were autoregressive and moving average terms in both cases. Since there were different p and q values used to model the residuals for each time series, it is difficult to use the ACF and PACF to determine values for p and q for the multivariate model. Because of this, we will test models with p from 1 to xx and q from 0 to xx to determine the best VARMA model.
 
 ## Models
 ```{r}
