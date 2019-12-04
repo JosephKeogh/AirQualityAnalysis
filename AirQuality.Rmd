@@ -1210,8 +1210,11 @@ CO.forecast <- E_Y.pred.CO + e_t.pred.CO$mean
 
 Forecast for NO2 
 ```{r}
-E_Y.pred.NO <- predict(NO.lm, newdata=air.test$CO.GT.)
+E_Y.pred.NO <- predict(NO.lm, newdata=air.test$NO.GT.)
+air.test$NO2.GT.
+E_Y.pred.NO
 e_t.pred.NO <- forecast(NO.residuals, h=7)
+e_t.pred.NO
 NO.forecast <- E_Y.pred.NO + e_t.pred.NO$mean
 ```
 
