@@ -8,7 +8,7 @@ output:
   html_dCOument: default
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include = FALSE}
 #=======
 #Anna's Setup
 #=======
@@ -32,8 +32,7 @@ library(mtsdi)
 library(MTS)
 ```
 
-
-```{r}
+```{r setup, include = FALSE}
 # Joey Set Up
 require("knitr")
 datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/AirQualityData"
@@ -43,7 +42,6 @@ library(forecast)
 library(mtsdi)
 library(MTS)
 ```
-
 
 # Load Data and Impute Missing Values
 ```{r, warning=FALSE}
@@ -92,9 +90,9 @@ a <- nrow(dailyAQ)
 b <- nrow(air.train)
 c <- nrow(air.test)
 
-a
-b
-c
+# a
+# b
+# c
 ```
 
 # Data Summary
@@ -112,13 +110,13 @@ CO.ts <- ts(air.train$CO.GT.)
 # visualize raw data
 plot(CO.ts)
 ```
-There is no extremely obvious trend from the plot of the time series. There may be some seasonality, but we are unsure as of now if this fluctuation is from seasonality or if it is random.
+There appears to be some trend from looking at the plot of the time series (i.e. the mean is not constant for the whole time series). There may be some seasonality, but we are unsure as of now if this fluctuation is from seasonality or if it is random.
 
 ```{r}
 # periodogram
 pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
 ```
-Based on the periodogram, there are multiple possibilities for the period of a seasonal component. There are a few spikes, each of which indicate a possible frequency/period to explain the seasonality of the data. We predict that if the seasonality is significant in the model, it will be based on a complex wave. 
+Based on the periodogram, there are multiple possibilities for the period of a seasonal component. There are a few spikes, each of which indicate a possible frequency/period to explain the seasonality of the data. We predict that if seasonality is significant in the model, it will be based on a complex wave. This is because there are many options for the period of potential seasons. 
 
 ## Seasonality
 ### Finding Potential Periods
@@ -188,7 +186,7 @@ CO.lm.top4 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p2) +
 # model summary
 summary(CO.lm.top4)
 ```
-This model will be compared to a model that only uses the first "important" period (i.e. the period associated with the largest spike in the periodogram, with the exception of the one corresponding to 384 days).
+Based on the model utility test, this model is significant at the 0.05 level, so we will continue to analyze its performance in comparison to other models. We will compare it to a model that only uses the first "important" period (i.e. the period associated with the largest spike in the periodogram, with the exception of the one corresponding to 384 days).
 
 ### Compare Larger Model with Model with Only First Important Period
 ```{r}
@@ -201,7 +199,7 @@ summary(CO.lm.top1)
 # anova
 anova(CO.lm.top1, CO.lm.top4)
 ```
-The p-value of the partial F-test is 0.0024, which is significant at the 0.05 level. We reject the null hypothesis, which means that the larger model contains at least one coefficient, not shared with the smaller model, that is significant. The larger model is better at explaining variability.
+The p-value of the partial F test is 0.0024, which is significant at the 0.05 level. We reject the null hypothesis, which means that the larger model contains at least one coefficient, not shared with the smaller model, that is significant. As a result of this test, we have concluded that the larger model is better at explaining variability.
 
 ### Create Model with All Identified Periods
 ```{r}
@@ -223,7 +221,7 @@ summary(CO.lm.top5)
 # compare with smaller model
 anova(CO.lm.top4, CO.lm.top5)
 ```
-We created the model that used all five periods identified from the periodogram. We compared it to the model without the 384-day period using a partial F test. The test is significant at the 0.05 level, which means there is significant evidence to use the larger model. We will use the model with all five periods to explain seasonality in further analysis.
+We created a model that used all five periods identified from the periodogram. We compared it to the model without the 384-day period using a partial F test. The test is significant at the 0.05 level, which means there is significant evidence to use the larger model. We will use the model with all five periods to explain seasonality in further analysis.
 
 ### Visual Inspection of Model
 ```{r}
@@ -250,10 +248,10 @@ plot(sorted.Ts, xlim=c(0,30))
 next.low.period <- boxplot(sorted.Ts[6:10])$stats[3]
 next.low.period
 ```
-The average of the periods associated with the next five highest spikes of the periodogram is about 7 days. A period of around 7 days makes sense to us, as CO production could be vary weekly from people working and commuting.
+The average of the periods associated with the next five highest spikes of the periodogram is about 7 days (7.11). A period of around 7 days makes sense to us, as CO production could vary weekly from people working and commuting.
 
 ### Add New Period to Model
-We made a new model with all five periods in our previous model and the addition of the new period around 7 days.
+We made a new model with all five periods in our previous model with the addition of the new period of around 7 days.
 ```{r}
 CO.p6 <- next.low.period
 
@@ -285,7 +283,7 @@ plot(CO.ts, xlim=c(100,200))
 lines(CO.lm.top6$fitted.values, col = "red")
 ```
 Upon visually inspecting this new model, we see smaller fluctuations, which we wanted. However, we do see that the peaks of the smaller waves do not consistently match up with where the data has a peak, based on the zoomed in graphs.  
-After determining if there is a significant trend, we will compare the potential trend and seasonality models with five and 6 periods to determine which one will comprise our final linear model.
+After determining if there is a significant trend, we will compare the potential trend and seasonality models with five and six periods to determine which one will be the best selection for our final linear model.
 
 ## Trend
 ### Model Time Series Based on Time
@@ -303,6 +301,7 @@ The p-value is 0.00097, so there is a significant trend in the data.
 plot(CO.ts)
 abline(CO.lm.trend, col='red')
 ```
+This graph shows the trendline plotted in red over the time series.
 
 ### Model Comparison: Trend and Seasonality Together
 ```{r}
@@ -334,7 +333,7 @@ CO.seasonal6.trend <- lm(CO.ts ~ time.CO + sin(2*pi*time.CO/CO.p1) +
 
 anova(CO.seasonal5.trend, CO.seasonal6.trend)
 ```
-The p-value is large (not significant at the 0.05 level), which means that the smaller model is preferred.
+The p-value of the partial F test is large (not significant at the 0.05 level), which means that the smaller model is preferred. Based on this test, we would choose the model with trend and five periods.
 
 #### Visual Comparison
 ```{r}
@@ -352,7 +351,7 @@ lines(model2$fitted.values, col = "red")
 plot(CO.ts, xlim=c(0,100))
 lines(model2$fitted.values, col = "red")
 ```
-Based on visual inspection, both models are pretty good, especially at modeling the data at the beginning of the time series. After that, while the peaks are not of the same magnitude as those of the data, they occur at relatively the same x-value in both plots. The differences in the models are slight, which makes it difficult to determine the best one by eye. 
+Based on visual inspection, both models capture the overall trend of the data well. The model with trend and six periods has smaller fluctuations, instead of being a smooth curve like the other model, which visually appears to look more similar to the time series. Again, we see that the peaks of the model do not always occur at the same time value as the peaks of the data. 
 
 #### Comparison Using Metrics
 ```{r}
@@ -377,7 +376,7 @@ The AIC of the model with 5 periods is 1519.205. The AIC of the model with 6 per
 plot(CO.seasonal5.trend, which = 1)
 plot(CO.seasonal6.trend, which = 1)
 ```
-The mean of the residuals is approximately 0 and the variance is not constant for either model. There is less variance (less spread above and below the x-axis) on the left-hand side of the plot, and the variance increases to the right. The relationship evident in the plots indicates a lack of fit.
+The mean of the residuals is approximately 0, but the variance is not constant for either model. There is less variance (less spread above and below the x-axis) on the left-hand side of the plot, and the variance increases to the right. The relationship evident in the plots indicates a lack of fit.
 
 \pagebreak
 **QQ Plot**
@@ -1229,24 +1228,22 @@ compare cross-correlation
 ## Auto-Correlation
 ## Cross-Correlation
 
-#### Bonus 
-
-# Create forecasts
-Forecast for CO 
+# Bonus: Forecasting
+## Forecast for CO 
 ```{r}
 E_Y.pred.CO <- predict(CO.lm, newdata=air.test$CO.GT.)
 e_t.pred.CO <- forecast(CO.residuals, h=7)
 CO.forecast <- E_Y.pred.CO + e_t.pred.CO$mean
 ```
 
-Forecast for NO2 
+## Forecast for NO2 
 ```{r}
 E_Y.pred.NO <- predict(NO.lm, newdata=air.test$CO.GT.)
 e_t.pred.NO <- forecast(NO.residuals, h=7)
 NO.forecast <- E_Y.pred.NO + e_t.pred.NO$mean
 ```
 
-Forecast for CO and NO2 
+## Forecast for CO and NO2 (MUltivariate Model)
 ```{r}
 CO.NO.forecast <- VARMApred(CO.NO.residuals, h=7)
 
@@ -1262,8 +1259,7 @@ NO.multi.forecast <- E_Y.pred.NO + e_t.pred.NO.multi
 
 ```
 
-# MSE 
-
+## Comparison based on MSE 
 ```{r}
 #CO MSE
 mean((CO.forecast-air.test$CO.GT.)^2)
@@ -1276,8 +1272,7 @@ mean((CO.multi.forecast-air.test$CO.GT.)^2)
 mean((NO.multi.forecast-air.test$NO2.GT.)^2)
 ```
 
-
-# Visually 
+## Visual Comparison
 ```{r}
 #CO Uni plot 
 # Plot actual values and predicted values
@@ -1309,7 +1304,4 @@ lines(ts(NO.multi.forecast),col='red',type='o')
 lines(1:6, E_Y.pred.NO + e_t.pred.NO.lower, col = "red", lty = "dashed")
 lines(1:6, E_Y.pred.NO + e_t.pred.NO.upper, col = "red", lty = "dashed")
 legend(1,80, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
-
 ```
-
-
