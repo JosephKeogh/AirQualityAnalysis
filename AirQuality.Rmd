@@ -413,22 +413,9 @@ These plots show that all of the points have small Cook's distances for both mod
 
 Both models perform very similarly in the diagnostics.
 
-### testing another method
-```{r}
-CO.test <- lm(CO.ts ~ CO.lm.trend$effects + CO.seasonal6.trend$effects)
-
-# plot the test
-model1 <- CO.test
-plot(CO.ts)
-lines(model1$fitted.values, col = "red")
-
-plot(CO.ts, xlim=c(0,100))
-lines(model1$fitted.values, col = "red")
-```
-
-
 ### Choose Trend + Seasonal Model
 ```{r}
+# create the combined model
 CO.lm <- CO.seasonal5.trend
 ```
 Since both models performed similarly in metrics and diagnostics, we have chosen to use the model with the trend and top five identified periods to explain seasonality. It was preferred from the partial F test, and we feel that it is better to choose the simpler model since the two models have such similar performance in metrics and diagnostics.
@@ -495,11 +482,15 @@ Based on AIC, the two best models are the ARIMA(7,0,9) and ARIMA(7,1,9) models.
 
 After testing the possible values of p, d, and q that we identified, we also used the auto.arima function to generate another model.
 ```{r}
+#todo unsure about whether the auto.arima function should be run on a ts or just the residuals, CO.residuals.auto.two is the later of the two options
 # auto.arima model
 CO.residuals.auto <- auto.arima(e.ts.CO)
+CO.residuals.auto.two <- auto.arima(CO.lm$residuals, approximation = FALSE)
 
 # summary
 summary(CO.residuals.auto)
+
+summary(CO.residuals.auto.two)
 ```
 The ARIMA model is a 5,0,2 model. This means that there are autoregressive and moving average terms, where p = 5 and q = 2. Also, d = 0, meaning that the first differences were not needed to ensure stationarity, which is a key assumption to modeling the residuals. The AIC for this model is 1413.39.
 
@@ -514,6 +505,9 @@ The model that performs the best in diagnostics is the ARIMA(7,1,9) model. It ha
 ### Choose Model for Residuals
 ```{r}
 CO.residuals <- CO.arima719
+CO.residuals <- CO.residuals.auto
+
+summary(CO.residuals)
 ```
 
 ## Final Model
@@ -521,13 +515,81 @@ The final model includes a trend and seasonality, using 5 different periods (384
 
 ### create the final model
 ```{r}
-CO.final <- 
+
+# set the seed to keep consistent values
+set.seed(1)
+
+# quick fix to allow their code to work with ours
+e.Tmin.lm <- CO.residuals
+
+# simulate the arima values
+# 365 was chosen because we are to simulate a year of data
+
+# this is for the large arima function
+# e.CO.sim <- arima.sim(n=365, 
+#                       list(
+#                             ar=c(
+#                                 e.Tmin.lm$coef[1],e.Tmin.lm$coef[2],e.Tmin.lm$coef[3],
+#                                 e.Tmin.lm$coef[4],e.Tmin.lm$coef[5],e.Tmin.lm$coef[6],
+#                                 e.Tmin.lm$coef[7]
+#                               ), 
+#                             ma=c(
+#                               e.Tmin.lm$coef[8],e.Tmin.lm$coef[9],e.Tmin.lm$coef[10],
+#                               e.Tmin.lm$coef[11],e.Tmin.lm$coef[12],e.Tmin.lm$coef[13],
+#                               e.Tmin.lm$coef[14],e.Tmin.lm$coef[15],e.Tmin.lm$coef[16]
+#                               )
+#                           ), 
+#                             sd=sqrt(e.Tmin.lm$sigma2)
+#                         )
+
+# this is for the auto.arima function
+e.CO.sim <- arima.sim(n=365, 
+                      list(
+                            ar=c(
+                                e.Tmin.lm$coef[1],e.Tmin.lm$coef[2],e.Tmin.lm$coef[3],
+                                e.Tmin.lm$coef[4],e.Tmin.lm$coef[5]
+                              ), 
+                            ma=c(
+                              e.Tmin.lm$coef[6],e.Tmin.lm$coef[7]
+                              )
+                          )
+                        )
+
+# the next time variable
+# this will need to be changed based on what we are predicting
+# right now doing 50 days
+next.time.time <- c(1:(50))
+next.time <- data.frame(time.CO = next.time.time)
+
+# the mean prediction of the linear model based on the next times
+CO.mean <- predict(CO.lm, newdata=next.time)
+
+# combine the simulated residuals and the predicted value
+CO.combined <- e.CO.sim + CO.mean
+
+# plot the results
+plot(CO.ts)
+lines(CO.lm$fitted.values, col='red')
+lines(CO.combined, col='cyan')
+
+# output results
+# e.CO.sim
+
 ```
 
+TA mentioned that we can either do a difference or model the trend, but we do not have to do both
 
 ## Diagnostics
 The residuals of the trend and seasonality linear model appear relatively normal, excluding the lower tail, from the QQ plot; however, problems remain with the residuals vs. fitted plot, indicating lack of fit. In the future, models should address problems with the normality in the lower tail and the lack of fit.
 The diagnostic plot for the model of the residuals does not have problems. The p-value for the Ljung-Box stastic is above the dashed line for all 20 lags, meaning the model is adequate for at least up to 20 lags. Future work could focus on increasing the number of lags for which the model is considered adequate.
+
+
+
+
+
+
+
+
 
 
 # Univariate Time Series for NO2
@@ -990,7 +1052,6 @@ The residuals of the trend and seasonality linear model appear relatively normal
 In the diagnostic plot for the model of the residuals, the p-value for the Ljung-Box stastic is above the dashed line for 15 of the 20 lags, meaning that the model of the residuals is adequate for up to 15 lags. A future model could work to extend the model adequacy to all 20 lags of the plot.
 
 
-<<<<<<< HEAD
 
 
 
@@ -999,10 +1060,7 @@ In the diagnostic plot for the model of the residuals, the p-value for the Ljung
 
 
 
-#### Multivariate Time Series
-=======
 # Multivariate Time Series
->>>>>>> a10e3dad640a27996d6bf5f7c87cccd930e58bee
 ## Seasonality and Trends
 We used the same linear models for the seasonality and trends that we discovered in our analysis of the univariate time series for CO and NO2. See above for how we modeled seasonal components and trends to produce these linear models.  
 The ARMA models for the residuals of both time series use d = 0, meaning that both meet the stationarity assumption without taking the first differences.
