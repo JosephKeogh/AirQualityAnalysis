@@ -1277,10 +1277,15 @@ compare cross-correlation
 # Create forecasts - worry about this later
 Forecast for CO 
 ```{r}
-E_Y.pred.CO <- predict(CO.lm, newdata=air.test$CO.GT.)
+nextweek.time.time <- c(1:(7))
+nextweek.time <- data.frame(time.CO = nextweek.time.time)
+
+E_Y.pred.CO <- predict(CO.lm, newdata=nextweek.time)
 e_t.pred.CO <- forecast(CO.residuals, h=7)
 CO.forecast <- E_Y.pred.CO + e_t.pred.CO$mean
+CO.forecast
 ```
+
 
 Forecast for NO2 
 ```{r}
@@ -1327,18 +1332,18 @@ mean((NO.multi.forecast-air.test$NO2.GT.)^2)
 ```{r}
 #CO Uni plot 
 # Plot actual values and predicted values
-plot(ts(air.test$CO.GT.),type='o',ylim=c(25,60))
+plot(ts(air.test$CO.GT.),type='o', ylim = c(0,10))
 lines(ts(CO.forecast),col='red',type='o')
-lines(1:6, E_Y.pred.CO + e_t.pred.CO$lower[,2], col = "red", lty = "dashed")
-lines(1:6, E_Y.pred.CO + e_t.pred.CO$upper[,2], col = "red", lty = "dashed")
-legend(1,60, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red")) 
+lines(1:7, E_Y.pred.CO + e_t.pred.CO$lower[,2], col = "red", lty = "dashed")
+lines(1:7, E_Y.pred.CO + e_t.pred.CO$upper[,2], col = "red", lty = "dashed")
+legend(2,2, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red")) 
 
 #NO Uni Plot 
 plot(ts(air.test$NO.GT.),type='o',ylim=c(25,60))
 lines(ts(NO.forecast),col='red',type='o')
 lines(1:6, E_Y.pred.NO + e_t.pred.NO$lower[,2], col = "red", lty = "dashed")
 lines(1:6, E_Y.pred.NO + e_t.pred.NO$upper[,2], col = "red", lty = "dashed")
-legend(1,60, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red")) 
+legend(2,1, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red")) 
 
 #Multi Plot 
 par(mfrow=c(1,2))
