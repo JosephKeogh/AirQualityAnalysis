@@ -415,6 +415,7 @@ Both models perform very similarly in the diagnostics.
 
 ### Choose Trend + Seasonal Model
 ```{r}
+# create the combined model
 CO.lm <- CO.seasonal5.trend
 ```
 Since both models performed similarly in metrics and diagnostics, we have chosen to use the model with the trend and top five identified periods to explain seasonality. It was preferred from the partial F test, and we feel that it is better to choose the simpler model since the two models have such similar performance in metrics and diagnostics.
@@ -504,6 +505,9 @@ The model that performs the best in diagnostics is the ARIMA(7,1,9) model. It ha
 ### Choose Model for Residuals
 ```{r}
 CO.residuals <- CO.arima719
+CO.residuals <- CO.residuals.auto
+
+summary(CO.residuals)
 ```
 
 ## Final Model
@@ -512,27 +516,44 @@ The final model includes a trend and seasonality, using 5 different periods (384
 ### create the final model
 ```{r}
 
-# do you have to simulate becaues the arima model is random?
+# set the seed to keep consistent values
+set.seed(1)
 
 # quick fix to allow their code to work with ours
 e.Tmin.lm <- CO.residuals
 
 # simulate the arima values
-e.CO.sim <- arima.sim(50, 
+# 365 was chosen because we are to simulate a year of data
+
+# this is for the large arima function
+# e.CO.sim <- arima.sim(n=365, 
+#                       list(
+#                             ar=c(
+#                                 e.Tmin.lm$coef[1],e.Tmin.lm$coef[2],e.Tmin.lm$coef[3],
+#                                 e.Tmin.lm$coef[4],e.Tmin.lm$coef[5],e.Tmin.lm$coef[6],
+#                                 e.Tmin.lm$coef[7]
+#                               ), 
+#                             ma=c(
+#                               e.Tmin.lm$coef[8],e.Tmin.lm$coef[9],e.Tmin.lm$coef[10],
+#                               e.Tmin.lm$coef[11],e.Tmin.lm$coef[12],e.Tmin.lm$coef[13],
+#                               e.Tmin.lm$coef[14],e.Tmin.lm$coef[15],e.Tmin.lm$coef[16]
+#                               )
+#                           ), 
+#                             sd=sqrt(e.Tmin.lm$sigma2)
+#                         )
+
+# this is for the auto.arima function
+e.CO.sim <- arima.sim(n=365, 
                       list(
                             ar=c(
                                 e.Tmin.lm$coef[1],e.Tmin.lm$coef[2],e.Tmin.lm$coef[3],
-                                e.Tmin.lm$coef[4],e.Tmin.lm$coef[5],e.Tmin.lm$coef[6],
-                                e.Tmin.lm$coef[7]
+                                e.Tmin.lm$coef[4],e.Tmin.lm$coef[5]
                               ), 
                             ma=c(
-                              e.Tmin.lm$coef[8],e.Tmin.lm$coef[9],e.Tmin.lm$coef[10],
-                              e.Tmin.lm$coef[11],e.Tmin.lm$coef[12],e.Tmin.lm$coef[13],
-                              e.Tmin.lm$coef[14],e.Tmin.lm$coef[15],e.Tmin.lm$coef[16]
+                              e.Tmin.lm$coef[6],e.Tmin.lm$coef[7]
                               )
-                             ), 
-                            sd=sqrt(e.Tmin.lm$sigma2)
                           )
+                        )
 
 # the next time variable
 # this will need to be changed based on what we are predicting
@@ -543,10 +564,19 @@ next.time <- data.frame(time.CO = next.time.time)
 # the mean prediction of the linear model based on the next times
 CO.mean <- predict(CO.lm, newdata=next.time)
 
-# view the prediction
-plot(CO.residuals + CO.mean, type = 'l', col='cyan')
+# combine the simulated residuals and the predicted value
+CO.combined <- e.CO.sim + CO.mean
+
+# plot the results
+plot(CO.ts)
+lines(CO.lm$fitted.values, col='red')
+lines(CO.combined, col='cyan')
+
+# output results
+# e.CO.sim
 ```
 
+TA mentioned that we can either do a difference or model the trend, but we do not have to do both
 
 ## Diagnostics
 The residuals of the trend and seasonality linear model appear relatively normal, excluding the lower tail, from the QQ plot; however, problems remain with the residuals vs. fitted plot, indicating lack of fit. In the future, models should address problems with the normality in the lower tail and the lack of fit.
