@@ -1244,9 +1244,57 @@ compare cross-correlation
 
 
 # Simulation from Univariate NO2 Model
+```{r}
+# NO2 ARIMA model is 1,0,4
+
+# simulate residuals
+NO.uni.sim <- arima.sim(n = 365, list(ar = c(NO.residuals$coef[1]), 
+                                      ma = c(NO.residuals$coef[2],
+                                             NO.residuals$coef[3],
+                                             NO.residuals$coef[4],
+                                             NO.residuals$coef[5])), 
+                                      sd = sqrt(NO.residuals$sigma2))
+
+# the next time variable- simulate the next 365 days
+next.time.NO <- data.frame(time.NO = next.time.time)
+
+NO.mean <- predict(NO.lm, newdata = next.time.NO)
+plot(NO.uni.sim + NO.mean)
+
+# make time series
+NO.uni.sim.ts <- ts(NO.uni.sim)
+```
+This is the plot of the simulation.
+
 ## Visualization
+```{r}
+# plot simulated values with observations
+plot(NO.ts, main = "Simulation from Univariate NO2 Model", col = "black", ylim = c(-75,350))
+lines(NO.uni.sim.ts, col = "red")
+legend(0, 350, legend = c("Time Series Data", "Simulation"), col = c("black", "red"), lwd = 1)
+```
+The simulation values are all much lower than the actual values.
+
 ## Trend
+```{r}
+# linear model for simulation
+NO.sim.lm <- lm(NO.uni.sim.ts ~ next.time.time)
+summary(NO.sim.lm)
+summary(NO.lm.trend)
+```
+We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. There was a slight increasing trend, but the p-value of the model utility test was 0.95, so the model is not significant. We can conclude that there is no significant trend in the simulation.  
+There was a significant trend in the actual data set. The trend was increasing, with a coefficient estimate of 0.256. Since trend was not significant for the simulation, we cannot say that the simulation was able to reproduce the trend of the original time series.
+
 ## Seasonality
+```{r}
+# compare periodogram of observations and periodogram of simulation
+par(mfrow = c(1,2))
+pg.NO <- spec.pgram(NO.ts,spans=9, demean=T, log='no')
+pg.NO.uni.sim <- spec.pgram(NO.uni.sim.ts, spans = 9, demean = T, log = 'no')
+par(mfrow = c(1,1))
+```
+The periodograms of the original observations and simulation do not look the same. There are more spikes in the periodogram of the simulation, and the spikes are higher. Based on the visual comparison of the periodograms, the simulation did not reproduce the seasonality of the original time series.
+
 ## Mean and Variance
 ## Auto-Correlation
 ## Cross-Correlation
