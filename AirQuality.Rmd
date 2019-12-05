@@ -502,18 +502,13 @@ Based on AIC, the two best models are the ARIMA(2,0,1) and ARIMA(2,1,2) models.
 
 After testing the possible values of p, d, and q that we identified, we also used the auto.arima function to generate another model.
 ```{r}
-#todo unsure about whether the auto.arima function should be run on a ts or just the residuals, CO.residuals.auto.two is the latter of the two options
-# when you run the first one with approximation = FALSE added, then it is the same as doing the second one. In the code I took the first one from (in TS3) it does not have approximation = FALSE, but the code that the second one is based on (from TS4) does have it
-
 # auto.arima model
-CO.residuals.auto <- auto.arima(e.ts.CO)
-CO.residuals.auto.two <- auto.arima(CO.lm$residuals, approximation = FALSE)
+CO.residuals.auto <- auto.arima(e.ts.CO, approximation = FALSE)
 
 # summary
 summary(CO.residuals.auto)
-summary(CO.residuals.auto.two)
 ```
-The ARIMA model is a 5,0,2 model. This means that there are autoregressive and moving average terms, where p = 5 and q = 2. Also, d = 0, meaning that the first differences were not needed to ensure stationarity, which is a key assumption to modeling the residuals. The AIC for this model is 1413.39.
+The ARIMA model is a 2,0,0 model. This means that there are autoregressive and moving average terms, where p = 2 and q = 2. Also, d = 0, meaning that the first differences were not needed to ensure stationarity, which is a key assumption to modeling the residuals. The AIC for this model is 1435.28.
 
 ### Diagnostics
 ```{r}
@@ -521,53 +516,20 @@ tsdiag(CO.arima201, gof.lag = 20)
 tsdiag(CO.arima212, gof.lag = 20)
 tsdiag(CO.residuals.auto, gof.lag = 20)
 ```
-The model that performs the best in diagnostics is the ARIMA(5,0,2) model. It has the most points with high p-values in the Ljung-Box statistic plot. It can be considered adequate for 15 lags, though the points from 11-15 lags are close to the dashed line. Both of the other models see their p-values approach 0 around 5 lags.
+Both the (2,0,1) and (2,1,2) models perform similarly in the diagnostic plot, though the (2,1,2) model has a slightly higher p-value for the sixth lag than the other model. The auto-generated (2,0,0) model is only adequate for four lags, as the p-value of the Ljung-Box statistic is not different from 0 (above the dashed line) for only the first four points. 
 
 ### Choose Model for Residuals
 ```{r}
-CO.residuals <- CO.residuals.auto
+CO.residuals <- CO.arima201
 ```
-Even though the auto-generated ARIMA model has a higher AIC value than the other two models, it performs much better in the diagnostic plot. We can consider the model adequate for 15 lags, instead of only 5 lags for the other models. Based on the diagnostics, we decided to choose the ARIMA(5,0,2) model as the final model for the residuals.
+The ARIMA(2,0,1) model has the smallest AIC of all of the models considered. It performs better than the auto-generated model, as it is adequate for more lags. Since it performs similarly to the ARIMA(2,1,2) model in the diagnostic plot but has a lower AIC, we decided to choose the ARIMA(2,0,1) model for the residuals.
 
 ## Final Model
-The final model includes a trend and seasonality, using 5 different periods (384, 192, 128, 96, and 76.8 days). The ARIMA model of the residuals is a 5,0,2 model.
-
-### Get predictions from the final model
-```{r}
-#todo I tried to fix this based on the new coefficients for the ARIMA model but the plot keeps giving me an error -Camryn
-# update I think I fixed whatever problem I was having, my code is under the CO simulation part and I did not use this to generate my simulation
-
-# change the name of the model of the residuals
-e.Tmin.lm <- CO.residuals
-
-# simulate the arima values
-e.CO.sim <- arima.sim(n = 365, 
-                      list(
-                            ar=c(
-                                e.Tmin.lm$coef[1],e.Tmin.lm$coef[2],e.Tmin.lm$coef[3],
-                                e.Tmin.lm$coef[4],e.Tmin.lm$coef[5]
-                              ), 
-                            ma=c(
-                              e.Tmin.lm$coef[6],e.Tmin.lm$coef[7]
-                              )
-                             ), 
-                            sd=sqrt(e.Tmin.lm$sigma2)
-                          )
-
-# the next time variable- next 365 days
-next.time.time <- c(1:(365))
-next.time <- data.frame(time.CO = next.time.time)
-
-# the mean prediction of the linear model based on the next times
-CO.mean <- predict(CO.lm, newdata = next.time)
-
-# view the prediction
-plot(CO.residuals + CO.mean, type = 'l', col='cyan')
-```
+The final model includes a trend and seasonality, using 5 different periods (384, 192, 128, 96, and 76.8 days). The ARIMA model of the residuals is a 2,0,1 model.
 
 ### Diagnostics
 The residuals of the trend and seasonality linear model appear relatively normal, excluding the lower tail, from the QQ plot; however, problems remain with the residuals vs. fitted plot, indicating lack of fit. In the future, models should address problems with the normality in the lower tail and the lack of fit.
-The diagnostic plot for the model of the residuals does not have problems. The p-value for the Ljung-Box stastic is above the dashed line for 15 of 20 lags, meaning the model is adequate for at least up to 15 lags. Future work could focus on increasing the number of lags for which the model is considered adequate.
+The diagnostic plot for the model of the residuals shows that it is adequate for five or six lags. Future work could focus on increasing the number of lags for which the model is considered adequate.
 
 \pagebreak
 # Univariate Time Series for NO2
@@ -1066,10 +1028,8 @@ Based on AIC, the two best models are the ARIMA(1,0,4) and ARIMA(3,0,2) models.
 
 After testing the possible values of p, d, and q that we identified, we also used the auto.arima function to generate another model.
 ```{r}
-#todo maybe change this once we know if we do auto.arima on time series of residuals or residuals themselves, do we need approximation = FALSE? the result is the same either way in this case
-
 # auto.arima model
-NO.residuals.auto <- auto.arima(e.ts.NO)
+NO.residuals.auto <- auto.arima(e.ts.NO, approximation = FALSE)
 
 # summary
 summary(NO.residuals.auto)
@@ -1093,12 +1053,6 @@ This model has the lowest AIC and also the best diagnostic plot of the models co
 ## Final Model
 The final model includes a trend and seasonality, using 9 different periods, two of which are the averages of 4 similar periods each. The ARIMA model of the residuals is a 1,0,4 model.
 
-### Get predictions from the final model
-```{r}
-#todo
-
-```
-
 ### Diagnostics
 The residuals of the trend and seasonality linear model appear relatively normal, from the QQ plot. There are no points with high Cook's distances. The residuals vs. fitted and scale-location plots have minor problems; they could have more even spread, but overall they look good and indicate acceptable fit. 
 In the diagnostic plot for the model of the residuals, the p-value for the Ljung-Box stastic is above the dashed line for 11 of the 20 lags, meaning that the model of the residuals is adequate for up to 11 lags. A future model could work to extend the model adequacy to all 20 lags of the plot.
@@ -1113,7 +1067,7 @@ We used the same linear models for the seasonality and trends that we discovered
 The ARMA models for the residuals of both time series use d = 0, meaning that both meet the stationarity assumption without taking the first differences.
 
 ## Autoregressive and Moving Average Terms
-In our univariate models, the residuals for CO were modeled with an ARIMA(5,0,2) model and the residuals for NO2 were modeled with an ARIMA(1,0,4) model. There were autoregressive and moving average terms in both cases. Since there were different p and q values used to model the residuals for each time series, it is difficult to use the ACF and PACF to determine values for p and q for the multivariate model. Because of this, we will test models with p from 1 to 5 and q from 0 to 4 to determine the best VARMA model.
+In our univariate models, the residuals for CO were modeled with an ARIMA(2,0,1) model and the residuals for NO2 were modeled with an ARIMA(1,0,4) model. There were autoregressive and moving average terms in both cases. Since there were different p and q values used to model the residuals for each time series, it is difficult to use the ACF and PACF to determine values for p and q for the multivariate model. Because of this, we will test models with p from 1 to 2 and q from 0 to 4 to determine the best VARMA model.
 
 ## Models
 ```{r, include = FALSE}
@@ -1122,9 +1076,9 @@ allResiduals <- data.frame(CO.lm$residuals, NO.lm$residuals)
 
 # Build VARMA models
 
-# p from 1 to 5, q from 0 to 4
-AICmatrix <- matrix(NA, 5, 5)
-for(p in 1:5) {
+# p from 1 to 2, q from 0 to 4
+AICmatrix <- matrix(NA, 2, 5)
+for(p in 1:2) {
   for(q in 0:4) {
     varma.model <- VARMACpp(allResiduals, p=p, q=q, include.mean=F)
     AICmatrix[p,q+1] <- varma.model$aic
@@ -1139,9 +1093,9 @@ We did not include the chunk that actually ran the code to test the VARMA models
 # 
 # # Build VARMA models
 # 
-# # p from 1 to 5, q from 0 to 4
-# AICmatrix <- matrix(NA, 5, 5)
-# for(p in 1:5) {
+# # p from 1 to 2, q from 0 to 4
+# AICmatrix <- matrix(NA, 2, 5)
+# for(p in 1:2) {
 #   for(q in 0:4) {
 #     varma.model <- VARMACpp(allResiduals, p=p, q=q, include.mean=F)
 #     AICmatrix[p,q+1] <- varma.model$aic
@@ -1157,15 +1111,15 @@ AICmatrix
 # AICmatrix.sorted <- sort(AICmatrix, decreasing = F, index.return = T)
 # AICmatrix.sorted
 ```
-The two models with the lowest AIC values are VARMA(2,3) and VARMA(1,1) with an AIC of 7.098223 and 7.103681, respectively.
+The two models with the lowest AIC values are VARMA(2,2) and VARMA(1,0) with an AIC of 7.098223 and 7.103681, respectively.
 
 ### Diagnostics
 ```{r}
 # model with lowest AIC
-varma.model1 <- VARMACpp(allResiduals, p=2, q=3, include.mean=F)
+varma.model1 <- VARMACpp(allResiduals, p=2, q=2, include.mean=F)
 
 # model with second lowest AIC
-varma.model2 <- VARMACpp(allResiduals, p=1, q=1, include.mean=F)
+varma.model2 <- VARMACpp(allResiduals, p=1, q=0, include.mean=F)
 
 # diagnostics for model1
 MTSdiag(varma.model1)
@@ -1173,17 +1127,17 @@ MTSdiag(varma.model1)
 # diagnostics for model2
 MTSdiag(varma.model2)
 ```
-The VARMA(2,3) model performs best in the diagnostics. The model is adequate for 11 lags, as the p-values for the Ljung-Box statistic are large for these points. The second model we tested had no Ljung-Box statistics at any lag with a p-value different from 0.
+The VARMA(2,2) model performs best in the diagnostics. The model is adequate for 11 lags, as the p-values for the Ljung-Box statistic are above the dashed line for these points. The second model we tested had three Ljung-Box statistics at lags 2, 3, and 4 with a p-value above the dashed line.
 
 ## Final Model
 ```{r, include = FALSE}
-varma.model <- VARMACpp(allResiduals, p=2, q=3, include.mean=F)
+varma.model <- VARMACpp(allResiduals, p=2, q=2, include.mean=F)
 ```
 We did not include the chunk that actually ran the code to create the final model, so that it would not print the output. The commented code below is the code we ran.
 ```{r, include = FALSE}
-# varma.model <- VARMACpp(allResiduals, p=2, q=3, include.mean=F)
+# varma.model <- VARMACpp(allResiduals, p=2, q=2, include.mean=F)
 ```
-The final model was chosen as the VARMA(2,3) model, because it has the lowest AIC and performed the best in the diagnostic plot.
+The final model was chosen as the VARMA(2,2) model, because it has the lowest AIC and performed the best in the diagnostic plot.
 
 ### Diagnostics
 The model is adequate for up to 11 lags, based on the diagnostic plot. Future work could attempt to produce a model adequate for more lags, but we feel that this is acceptable performance from the model we have chosen.
@@ -1191,16 +1145,12 @@ The model is adequate for up to 11 lags, based on the diagnostic plot. Future wo
 
 # Simulation from Univariate CO Model
 ```{r}
-# CO ARIMA model is 5,0,2
+# CO ARIMA model is 2,0,1
 
 # simulate residuals
 CO.uni.sim <- arima.sim(n = 365, list(ar = c(CO.residuals$coef[1], 
-                                             CO.residuals$coef[2],
-                                             CO.residuals$coef[3],
-                                             CO.residuals$coef[4],
-                                             CO.residuals$coef[5]), 
-                                      ma = c(CO.residuals$coef[6],
-                                             CO.residuals$coef[7])), 
+                                             CO.residuals$coef[2]), 
+                                      ma = c(CO.residuals$coef[3])), 
                                       sd = sqrt(CO.residuals$sigma2))
 
 # the next time variable- simulate the next 365 days
@@ -1227,19 +1177,22 @@ The simulation values are all much lower than the actual values.
 ## Trend
 ```{r}
 # linear model for simulation
-CO.sim.lm <- lm()
+CO.sim.lm <- lm(CO.uni.sim.ts ~ next.time.time)
+summary(CO.sim.lm)
+summary(CO.lm.trend)
 ```
-compare coefficient estimates
+We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. There was a slight decreasing trend, but the p-value of the model utility test was 0.55, so the model is not significant. We can conclude that there is no significant trend in the simulation.  
+There was a significant trend in the actual data set. The trend was increasing, with a coefficient estimate of 0.002876. Since trend was not significant for the simulation, we cannot say that the simulation was able to reproduce the trend of the original time series.
 
 ## Seasonality
 ```{r}
 # compare periodogram of observations and periodogram of simulation
 par(mfrow = c(1,2))
-pg.CO
+pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
 pg.CO.uni.sim <- spec.pgram(CO.uni.sim.ts, spans = 9, demean = T, log = 'no')
 par(mfrow = c(1,1))
 ```
-compare periodograms (get periods?)
+The periodograms of the original observations and simulation do not look the same. There are more spikes in the periodogram of the simulation, and the spikes are higher. Based on the visual comparison of the periodograms, the simulation did not reproduce the seasonality of the original time series.
 
 ## Mean and Variance
 ```{r}
@@ -1255,7 +1208,8 @@ var(CO.ts)
 # variance of simulation
 var(CO.uni.sim.ts)
 ```
-compare mean and variance
+The mean of the original time series is 4.36, and the mean of the simulation is 3.62. The mean is lower for the simulation, which was apparent from the plot of the time series and simulation together.  
+The variance of the original time series is 0.011, and the variance of the simulation is 2.86. The variance of the simulation is much higher than that of the original time series. This was also apparent from the plot of the two time series together, as there appear to be many more fluctuations in the simulation. 
 
 ## Auto-Correlation
 ```{r}
@@ -1265,7 +1219,7 @@ acf(CO.ts)
 # ACF of simulation
 acf(CO.uni.sim.ts)
 ```
-compare ACF
+The simulation did not accurately reproduce the autocorrelation of the time series. The time series has its first cutoff at lag 4 and then becomes significant again at lag 6, displaying somewhat sinusoidal behavior. The ACF of the simulation is only significant at 0 and 1 lags. 
 
 ```{r}
 # PACF of observations
@@ -1274,15 +1228,17 @@ pacf(CO.ts)
 # PACF of simulation
 pacf(CO.uni.sim.ts)
 ```
-compare PACF
+The simulation more accurately reproduced the PACF than the ACF, but it is still not a great match. The PACF of the time series is significant at 1 lag and again at lag 6, but the PACF of the simulation is significant for the first 2 lags, before becoming significant again at lag 8.
 
 ## Cross-Correlation
 ```{r}
+#todo this is just giving me 1??
+
 # cross-correlation of observations
-cor(air.train$CO.GT.)
+cor(data.frame(air.train$CO.GT.))
 
 # cross-correlation of simulation
-cor(CO.uni.sim)
+cor(data.frame(CO.uni.sim))
 ```
 compare cross-correlation
 
