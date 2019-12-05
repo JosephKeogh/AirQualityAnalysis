@@ -1134,7 +1134,7 @@ The VARMA(2,2) model performs best in the diagnostics. The model is adequate for
 varma.model <- VARMACpp(allResiduals, p=2, q=2, include.mean=F)
 ```
 We did not include the chunk that actually ran the code to create the final model, so that it would not print the output. The commented code below is the code we ran.
-```{r, include = FALSE}
+```{r}
 # varma.model <- VARMACpp(allResiduals, p=2, q=2, include.mean=F)
 ```
 The final model was chosen as the VARMA(2,2) model, because it has the lowest AIC and performed the best in the diagnostic plot.
@@ -1148,6 +1148,7 @@ The model is adequate for up to 11 lags, based on the diagnostic plot. Future wo
 # CO ARIMA model is 2,0,1
 
 # simulate residuals
+set.seed(1)
 CO.uni.sim <- arima.sim(n = 365, list(ar = c(CO.residuals$coef[1], 
                                              CO.residuals$coef[2]), 
                                       ma = c(CO.residuals$coef[3])), 
@@ -1161,18 +1162,18 @@ CO.mean <- predict(CO.lm, newdata = next.time)
 plot(CO.uni.sim + CO.mean)
 
 # make time series
-CO.uni.sim.ts <- ts(CO.uni.sim)
+CO.uni.sim.ts <- ts(CO.uni.sim + CO.mean)
 ```
 This is the plot of the simulation.
 
 ## Visualization
 ```{r}
 # plot simulated values with observations
-plot(CO.ts, main = "Simulation from Univariate CO Model", col = "black", ylim = c(-5,12))
+plot(CO.ts, main = "Simulation from Univariate CO Model", col = "black", ylim = c(-1,12))
 lines(CO.uni.sim.ts, col = "red")
 legend(0, 12.5, legend = c("Time Series Data", "Simulation"), col = c("black", "red"), lwd = 1)
 ```
-The simulation values are all much lower than the actual values.
+The simulation values appear to be similar to the time series data, though they are slightly larger than the time series before t = 200.
 
 ## Trend
 ```{r}
@@ -1181,8 +1182,7 @@ CO.sim.lm <- lm(CO.uni.sim.ts ~ next.time.time)
 summary(CO.sim.lm)
 summary(CO.lm.trend)
 ```
-We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. There was a slight decreasing trend, but the p-value of the model utility test was 0.55, so the model is not significant. We can conclude that there is no significant trend in the simulation.  
-There was a significant trend in the actual data set. The trend was increasing, with a coefficient estimate of 0.002876. Since trend was not significant for the simulation, we cannot say that the simulation was able to reproduce the trend of the original time series.
+We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. The model was significant, meaning that there is a trend to the simulation. The estimated coefficient value was 0.0032 for the simulation and 0.0029 for the original time series. These coefficients are very close, so the simulation was able to accurately reproduce the trend of the original time series. 
 
 ## Seasonality
 ```{r}
@@ -1192,7 +1192,7 @@ pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
 pg.CO.uni.sim <- spec.pgram(CO.uni.sim.ts, spans = 9, demean = T, log = 'no')
 par(mfrow = c(1,1))
 ```
-The periodograms of the original observations and simulation do not look the same. There are more spikes in the periodogram of the simulation, and the spikes are higher. Based on the visual comparison of the periodograms, the simulation did not reproduce the seasonality of the original time series.
+The periodograms of the original observations and simulation look similar. They have similar peak locations and magnitudes, especially at the lower end of the frequencies. The simulation was able to closely reproduce the seasonality of the time series.
 
 ## Mean and Variance
 ```{r}
@@ -1208,8 +1208,8 @@ var(CO.ts)
 # variance of simulation
 var(CO.uni.sim.ts)
 ```
-The mean of the original time series is 4.36, and the mean of the simulation is 3.62. The mean is lower for the simulation, which was apparent from the plot of the time series and simulation together.  
-The variance of the original time series is 0.011, and the variance of the simulation is 2.86. The variance of the simulation is much higher than that of the original time series. This was also apparent from the plot of the two time series together, as there appear to be many more fluctuations in the simulation. 
+The mean of the original time series is 4.36, and the mean of the simulation is 4.34. The means are very close together, which was apparent from the plot of both the time series and simulation together.  
+The variance of the original time series is 3.62, and the variance of the simulation is 3.499. The variances are also similar.
 
 ## Auto-Correlation
 ```{r}
@@ -1219,7 +1219,7 @@ acf(CO.ts)
 # ACF of simulation
 acf(CO.uni.sim.ts)
 ```
-The simulation did not accurately reproduce the autocorrelation of the time series. The time series has its first cutoff at lag 4 and then becomes significant again at lag 6, displaying somewhat sinusoidal behavior. The ACF of the simulation is only significant at 0 and 1 lags. 
+The simulation got close to reproducing the ACF of the time series. They both cutoff and become significant again and show somewhat sinusoidal behavior.
 
 ```{r}
 # PACF of observations
@@ -1228,19 +1228,9 @@ pacf(CO.ts)
 # PACF of simulation
 pacf(CO.uni.sim.ts)
 ```
-The simulation more accurately reproduced the PACF than the ACF, but it is still not a great match. The PACF of the time series is significant at 1 lag and again at lag 6, but the PACF of the simulation is significant for the first 2 lags, before becoming significant again at lag 8.
+The ACFs look more similar, though the PACF of the time series and simulation are close as well. Both cutoff and become significant again, and both are significant for the first lag but not for the second.
 
-## Cross-Correlation
-```{r}
-#todo this is just giving me 1??
-
-# cross-correlation of observations
-cor(data.frame(air.train$CO.GT.))
-
-# cross-correlation of simulation
-cor(data.frame(CO.uni.sim))
-```
-compare cross-correlation
+From comparing the ACF and PACF of the time series and simulation, the simulation was able to reproduce the autocorrelation of the time series.
 
 
 # Simulation from Univariate NO2 Model
@@ -1248,6 +1238,7 @@ compare cross-correlation
 # NO2 ARIMA model is 1,0,4
 
 # simulate residuals
+set.seed(1)
 NO.uni.sim <- arima.sim(n = 365, list(ar = c(NO.residuals$coef[1]), 
                                       ma = c(NO.residuals$coef[2],
                                              NO.residuals$coef[3],
@@ -1262,18 +1253,18 @@ NO.mean <- predict(NO.lm, newdata = next.time.NO)
 plot(NO.uni.sim + NO.mean)
 
 # make time series
-NO.uni.sim.ts <- ts(NO.uni.sim)
+NO.uni.sim.ts <- ts(NO.uni.sim + NO.mean)
 ```
 This is the plot of the simulation.
 
 ## Visualization
 ```{r}
 # plot simulated values with observations
-plot(NO.ts, main = "Simulation from Univariate NO2 Model", col = "black", ylim = c(-75,350))
+plot(NO.ts, main = "Simulation from Univariate NO2 Model", col = "black", ylim = c(0,350))
 lines(NO.uni.sim.ts, col = "red")
 legend(0, 350, legend = c("Time Series Data", "Simulation"), col = c("black", "red"), lwd = 1)
 ```
-The simulation values are all much lower than the actual values.
+The simulation values appear similar to the time series values, especially in the trend of the data.
 
 ## Trend
 ```{r}
@@ -1282,8 +1273,7 @@ NO.sim.lm <- lm(NO.uni.sim.ts ~ next.time.time)
 summary(NO.sim.lm)
 summary(NO.lm.trend)
 ```
-We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. There was a slight increasing trend, but the p-value of the model utility test was 0.95, so the model is not significant. We can conclude that there is no significant trend in the simulation.  
-There was a significant trend in the actual data set. The trend was increasing, with a coefficient estimate of 0.256. Since trend was not significant for the simulation, we cannot say that the simulation was able to reproduce the trend of the original time series.
+We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. The model was significant, meaning that there is a trend to the simulation. The estimated coefficient value was 0.262 for the simulation and 0.256 for the original time series. These coefficients are very close, so the simulation was able to accurately reproduce the trend of the original time series. 
 
 ## Seasonality
 ```{r}
@@ -1293,20 +1283,214 @@ pg.NO <- spec.pgram(NO.ts,spans=9, demean=T, log='no')
 pg.NO.uni.sim <- spec.pgram(NO.uni.sim.ts, spans = 9, demean = T, log = 'no')
 par(mfrow = c(1,1))
 ```
-The periodograms of the original observations and simulation do not look the same. There are more spikes in the periodogram of the simulation, and the spikes are higher. Based on the visual comparison of the periodograms, the simulation did not reproduce the seasonality of the original time series.
+The periodograms of the original observations and simulation look similar, but the periodogram for the simulation appears to have different peaks in the frequency range of 0.05 to 0.2. The simulation was able to somewhat closely reproduce the seasonality of the time series.
 
 ## Mean and Variance
+```{r}
+# mean of observations
+mean(NO.ts)
+
+# mean of simulation
+mean(NO.uni.sim.ts)
+
+# variance of observations
+var(NO.ts)
+
+# variance of simulation
+var(NO.uni.sim.ts)
+```
+The mean of the original time series is 164.53, and the mean of the simulation is 162.78. The means are very close together, which was apparent from the plot of both the time series and simulation together.  
+The variance of the original time series is 2657.722, and the variance of the simulation is 2619.679. The variances are also similar, with the simulation being a little lower.
+
 ## Auto-Correlation
-## Cross-Correlation
+```{r}
+# ACF of observations
+acf(NO.ts)
+
+# ACF of simulation
+acf(NO.uni.sim.ts)
+```
+The ACFs look very similar; they are both significant for all 25 lags in view on the plot and have some sinusoidal behavior. 
+
+```{r}
+# PACF of observations
+pacf(CO.ts)
+
+# PACF of simulation
+pacf(CO.uni.sim.ts)
+```
+The ACFs look more similar, though the PACF of the time series and simulation are close as well. Both cutoff and become significant again, and both are significant for the first lag but not for the second.
+
+From comparing the ACF and PACF of the time series and simulation, the simulation was able to reproduce the autocorrelation of the time series.
 
 
 # Simulation from Multivariate Model
-## Visualization
-## Trend
-## Seasonality
+```{r}
+# VARMA model is 2,2
+
+# simulate residuals
+set.seed(1)
+multi.sim <- VARMAsim(365, phi = varma.model$Phi,
+                           theta = varma.model$Theta,
+                           sigma = varma.model$Sigma)
+
+# make time series
+multi.sim.CO.ts <- ts(multi.sim$series[,1] + CO.mean)
+multi.sim.NO.ts <- ts(multi.sim$series[,2] + NO.mean)
+plot(multi.sim.CO.ts, main = "CO")
+plot(multi.sim.NO.ts, main = "NO2")
+```
+These are the plots of the simulations.
+
+## Visualization- CO
+```{r}
+# plot simulated values with observations
+plot(CO.ts, main = "Simulation from Multivariate Model for CO", col = "black", ylim = c(-1,12))
+lines(multi.sim.CO.ts, col = "red")
+legend(0, 12.5, legend = c("Time Series Data", "Simulation"), col = c("black", "red"), lwd = 1)
+```
+The simulation values appear to be similar to the time series data.
+
+## Visualization- NO2
+```{r}
+# plot simulated values with observations
+plot(NO.ts, main = "Simulation from Multivariate Model for NO2", col = "black", ylim = c(0,350))
+lines(multi.sim.NO.ts, col = "red")
+legend(0, 340, legend = c("Time Series Data", "Simulation"), col = c("black", "red"), lwd = 1)
+```
+The simulation values appear to be similar to the time series data.
+
+## Trend- CO
+```{r}
+# linear model for simulation
+CO.multi.sim.lm <- lm(multi.sim.CO.ts ~ next.time.time)
+summary(CO.multi.sim.lm)
+summary(CO.lm.trend)
+```
+We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. The model was significant, meaning that there is a trend to the simulation. The estimated coefficient value was 0.0033 for the simulation and 0.0029 for the original time series. These coefficients are very close, so the simulation was able to accurately reproduce the trend of the original time series. 
+
+## Trend- NO2
+```{r}
+# linear model for simulation
+NO.multi.sim.lm <- lm(multi.sim.NO.ts ~ next.time.time)
+summary(NO.multi.sim.lm)
+summary(NO.lm.trend)
+```
+We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. The model was significant, meaning that there is a trend to the simulation. The estimated coefficient value was 0.255 for the simulation and 0.256 for the original time series. These coefficients are very close, so the simulation was able to accurately reproduce the trend of the original time series. 
+
+## Seasonality- CO
+```{r}
+# compare periodogram of observations and periodogram of simulation
+par(mfrow = c(1,2))
+pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
+pg.CO.multi.sim <- spec.pgram(multi.sim.CO.ts, spans = 9, demean = T, log = 'no')
+par(mfrow = c(1,1))
+```
+The periodograms of the original observations and simulation are not very similar. There are fewer peaks in the simulation periodogram.
+
+## Seasonality- NO2
+```{r}
+# compare periodogram of observations and periodogram of simulation
+par(mfrow = c(1,2))
+pg.NO <- spec.pgram(NO.ts,spans=9,demean=T,log='no')
+pg.NO.multi.sim <- spec.pgram(multi.sim.NO.ts, spans = 9, demean = T, log = 'no')
+par(mfrow = c(1,1))
+```
+The periodograms of the original observations and simulation are similar. There are similar peaks in similar locations in both periodograms.
+
 ## Mean and Variance
-## Auto-Correlation
-## Cross-Correlation
+```{r}
+# mean of observations- CO
+mean(CO.ts)
+
+# mean of simulation- CO
+mean(multi.sim.CO.ts)
+
+# mean of observations- NO2
+mean(NO.ts)
+
+# mean of simulation- NO2
+mean(multi.sim.NO.ts)
+
+# variance of observations- CO
+var(CO.ts)
+
+# variance of simulation- CO
+var(multi.sim.CO.ts)
+
+# variance of observations- NO2
+var(NO.ts)
+
+# variance of simulation- NO2
+var(multi.sim.NO.ts)
+```
+**CO: **The mean of the original time series is 4.36, and the mean of the simulation is 4.24. The means are very close together, which was apparent from the plot of both the time series and simulation together.  
+The variance of the original time series is 3.62, and the variance of the simulation is 3.59. The variances are also similar.
+
+**NO2: **The mean of the original time series is 164.53, and the mean of the simulation is 160.64. The means are close together, which was apparent from the plot of both the time series and simulation together.  
+The variance of the original time series is 2657.722, and the variance of the simulation is 2499.248. The variances are also similar.
+
+## Auto-Correlation- CO
+```{r}
+# ACF of observations
+acf(CO.ts)
+
+# ACF of simulation
+acf(multi.sim.CO.ts)
+```
+The simulation got close to reproducing the ACF of the time series, though the ACF of the simulation is significant for all of the lags in view and the ACF of the time series cuts off and becomes significant again. Both have some sinusoidal behavior.
+
+```{r}
+# PACF of observations
+pacf(CO.ts)
+
+# PACF of simulation
+pacf(multi.sim.CO.ts)
+```
+The PACF of the simulation does not match the PACF of the time series. The PACF of the simulation cuts off after 5 lags, but the PACF of the original time series cuts off after 1 lag and then becomes significant again.
+
+From comparing the ACF and PACF of the time series and simulation, the simulation was somewhat able to reproduce the autocorrelation of the time series.
+
+## Auto-Correlation- NO2
+```{r}
+# ACF of observations
+acf(NO.ts)
+
+# ACF of simulation
+acf(multi.sim.NO.ts)
+```
+The simulation got very close to reproducing the ACF of the time series. They both are significant for all lags in view on the plot and display some sinusoidal behavior.
+
+```{r}
+# PACF of observations
+pacf(NO.ts)
+
+# PACF of simulation
+pacf(multi.sim.NO.ts)
+```
+The ACFs look more similar. The PACF shows more significance at the smaller lags than the original time series.
+
+From comparing the ACF and PACF of the time series and simulation, the simulation was somewhat able to reproduce the autocorrelation of the time series.
+
+# Cross-Correlation
+## Cross-Correlation of Time Series
+```{r}
+cor(CO.ts, NO.ts)
+#correlation = 0.608
+```
+
+## Cross-Correlation of Univariate Models
+```{r}
+cor(CO.uni.sim.ts, NO.uni.sim.ts)
+#correlation = 0.126
+```
+
+## Cross-Correlation of Multivariate Models
+```{r}
+cor(multi.sim.CO.ts, multi.sim.NO.ts)
+#correlation = 0.560
+```
+The cross-correlation for the original time series is 0.608. The cross-correlation for the univariate models is much lower, at 0.126. The cross-correlation for the multivariate models is 0.560, which is closer to the original value. Using a multivariate model better preserved the correlation between the time series.
 
 # Bonus: Forecasting
 ## Forecast for CO 
