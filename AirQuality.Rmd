@@ -410,7 +410,7 @@ plot(CO.seasonal6.trend,labels.id = NULL, which = 4)
 ```
 These plots show that all of the points have small Cook's distances for both models.
 
-Both models perform very similarly in the diagnostics.
+Both models perform very similarly in the diagnostics. We do not feel that either model needs a log or Box Cox transformation to improve the diagnostics.
 
 ### Choose Trend + Seasonal Model
 ```{r}
@@ -875,7 +875,7 @@ plot(NO.seasonal10.trend,labels.id = NULL, which = 4)
 ```
 Both models have low Cook's distances for all points.
 
-Both models perform similarly in the diagnostics.
+Both models perform similarly in the diagnostics. We do not feel that either model needs a log or Box Cox transformation to improve the diagnostics.
 
 ### Choose Trend + Seasonal Model
 ```{r}
