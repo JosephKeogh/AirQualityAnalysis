@@ -4,21 +4,20 @@ author: "Camryn Burley, Anna Haikl, and Joseph Keogh"
 date: "12-4-19"
 abstract: "On our honor as students, we have neither given nor received aid on this assignment."
 output:
-  pdf_dCOument: default
-  html_dCOument: default
+  pdf_document: default
 ---
 
-```{r setup, include = FALSE}
+```{r , include = FALSE}
 #=======
 #Anna's Setup
 #=======
-require("knitr")
-datadir <- "/Users/annahaikl/Desktop/UVA/FALL 2019/4021/DATA/Air Quality"
-sourcedir <-"/Users/annahaikl/Desktop/UVA/FALL 2019/4021/CODE"
-opts_knit$set(root.dir = sourcedir)
-library(forecast)
-library(mtsdi)
-library(MTS)
+# require("knitr")
+# datadir <- "/Users/annahaikl/Desktop/UVA/FALL 2019/4021/DATA/Air Quality"
+# sourcedir <-"/Users/annahaikl/Desktop/UVA/FALL 2019/4021/CODE"
+# opts_knit$set(root.dir = sourcedir)
+# library(forecast)
+# library(mtsdi)
+# library(MTS)
 ```
 
 ```{r setup, include = FALSE}
@@ -32,15 +31,15 @@ library(mtsdi)
 library(MTS)
 ```
 
-```{r setup, include = FALSE}
+```{r , include = FALSE}
 # Joey Set Up
-require("knitr")
-datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/AirQualityData"
-sourcedir <-"C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Code"
-opts_knit$set(root.dir = sourcedir)
-library(forecast)
-library(mtsdi)
-library(MTS)
+# require("knitr")
+# datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/AirQualityData"
+# sourcedir <-"C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Code"
+# opts_knit$set(root.dir = sourcedir)
+# library(forecast)
+# library(mtsdi)
+# library(MTS)
 ```
 
 # Load Data and Impute Missing Values
@@ -1492,30 +1491,29 @@ cor(multi.sim.CO.ts, multi.sim.NO.ts)
 ```
 The cross-correlation for the original time series is 0.608. The cross-correlation for the univariate models is much lower, at 0.126. The cross-correlation for the multivariate models is 0.560, which is closer to the original value. Using a multivariate model better preserved the correlation between the time series.
 
-# Bonus: Forecasting
-## Forecast for CO 
+# Bonus 
+## Create Forecasts
+### Forecast for CO 
 ```{r}
 nextweek.time.time <- c(1:(7))
-nextweek.time <- data.frame(time.CO = nextweek.time.time)
-E_Y.pred.CO <- predict(CO.lm, newdata = nextweek.time)
+nextweek.time.CO <- data.frame(time.CO = nextweek.time.time)
+
+E_Y.pred.CO <- predict(CO.lm, newdata = nextweek.time.CO)
 e_t.pred.CO <- forecast(CO.residuals, h=7)
 CO.forecast <- E_Y.pred.CO + e_t.pred.CO$mean
-CO.forecast
 ```
 
-## Forecast for NO2 
+### Forecast for NO2 
 ```{r}
 nextweek.time.NO <- data.frame(time.NO = nextweek.time.time)
 E_Y.pred.NO <- predict(NO.lm, newdata = nextweek.time.NO)
 e_t.pred.NO <- forecast(NO.residuals, h=7)
 NO.forecast <- E_Y.pred.NO + e_t.pred.NO$mean
-NO.forecast
 ```
 
-## Forecast for CO and NO2 (Multivariate Model)
+### Forecast for CO and NO2 (Multivariate Model)
 ```{r}
-#todo is this right?
-CO.NO.forecast <- VARMApred(CO.NO.residuals, h=7)
+CO.NO.forecast <- VARMApred(varma.model, h=7)
 
 e_t.pred.CO.multi <- CO.NO.forecast$pred[,1]
 e_t.pred.CO.lower <- CO.NO.forecast$pred[,1] - 1.96*CO.NO.forecast$se.err[,1]
@@ -1530,8 +1528,6 @@ NO.multi.forecast <- E_Y.pred.NO + e_t.pred.NO.multi
 
 ## Comparison based on MSE 
 ```{r}
-#todo find MSE for multivariate, then write to compare
-
 #CO MSE
 mean((CO.forecast-air.test$CO.GT.)^2)
 # MSE = 4.71
@@ -1540,12 +1536,13 @@ mean((CO.forecast-air.test$CO.GT.)^2)
 mean((NO.forecast-air.test$NO2.GT.)^2)
 # MSE = 542.95
 
-#CO and NO2 MSE
+#CO and NO2 MSE - Multivariate
 mean((CO.multi.forecast-air.test$CO.GT.)^2)
-# MSE = 
+# MSE = 4.40
 mean((NO.multi.forecast-air.test$NO2.GT.)^2)
-# MSE = 
+# MSE = 543.25
 ```
+The MSE for the CO forecast from the univariate model is higher than that from the multivariate model which implies that the multivariate model models the residuals of CO better. Conversely, the MSE for the univariate model for NO2 is smaller than that from the multivariate model which implies that the univariate model does a better job of modeling the residuals of NO2. Despite all this, the MSE between the univariate and multivariate models are very close. 
 
 ## Visual Comparison
 ### Forecast from CO Univariate Model
@@ -1555,37 +1552,38 @@ plot(ts(air.test$CO.GT.),type='o',ylim=c(0,10))
 lines(ts(CO.forecast),col='red',type='o')
 lines(1:7, E_Y.pred.CO + e_t.pred.CO$lower[,2], col = "red", lty = "dashed")
 lines(1:7, E_Y.pred.CO + e_t.pred.CO$upper[,2], col = "red", lty = "dashed")
-legend(2,2, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red")) 
+legend(2,2, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
+
 ```
 The predicted values are higher than the actual values for all but one point. There are two actual values that lie outside of the confidence interval of the prediction.
 
 ### Forecast from NO2 Univariate Model
 ```{r}
 # Plot actual values and predicted values
-plot(ts(air.test$NO2.GT.),type='o',ylim=c(75,275))
+plot(ts(air.test$NO2.GT.),type='o',ylim=c(50,275))
 lines(ts(NO.forecast),col='red',type='o')
 lines(1:7, E_Y.pred.NO + e_t.pred.NO$lower[,2], col = "red", lty = "dashed")
 lines(1:7, E_Y.pred.NO + e_t.pred.NO$upper[,2], col = "red", lty = "dashed")
-legend(2,116, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red")) 
+legend(2,107, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red")) 
 ```
 All of the actual values are within the bounds of the confidence interval of the predictions. The actual valyes are higher than the predictions for 5 out of the 7 points.
 
+### Forecast from Multivariate Model 
 ```{r}
-#todo make sure these run, then write about them
-
-#Multi Plot 
-par(mfrow=c(1,2))
 # CO forecasts
-plot(ts(air.test$CO.GT.),type='o',ylim=c(20,65))
+plot(ts(air.test$CO.GT.),type='o', ylim = c(0,10), main = "CO Forecast")
 lines(ts(CO.multi.forecast),col='red',type='o')
-lines(1:6, E_Y.pred.CO + e_t.pred.CO.lower, col = "red", lty = "dashed")
-lines(1:6, E_Y.pred.CO + e_t.pred.CO.upper, col = "red", lty = "dashed")
-legend(1,60, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
+lines(1:7, E_Y.pred.CO + e_t.pred.CO.lower, col = "red", lty = "dashed")
+lines(1:7, E_Y.pred.CO + e_t.pred.CO.upper, col = "red", lty = "dashed")
+legend(2,2, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
 
 #NO forecasts
-plot(ts(air.test$NO2.GT.),type='o',ylim=c(40,85))
+plot(ts(air.test$NO2.GT.),type='o',ylim = c(50,275),main = "NO2 Forecast")
 lines(ts(NO.multi.forecast),col='red',type='o')
-lines(1:6, E_Y.pred.NO + e_t.pred.NO.lower, col = "red", lty = "dashed")
-lines(1:6, E_Y.pred.NO + e_t.pred.NO.upper, col = "red", lty = "dashed")
-legend(1,80, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
+lines(1:7, E_Y.pred.NO + e_t.pred.NO.lower, col = "red", lty = "dashed")
+lines(1:7, E_Y.pred.NO + e_t.pred.NO.upper, col = "red", lty = "dashed")
+legend(2,107, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
 ```
+Similar to the univariate model's forecast, the multivariate model's forecast for CO predicts that all points are higher than their actual values. There is only one point that is outside the confidence interval and it appears as if it is only just barely outside the interval. 
+
+Much like the univariate model, the actual values for NO2 all lie within the multivariate model's confidence interval. 2 predicted points are less than their predicted values and 5 points are greater than their predicted values. 
