@@ -559,3 +559,19 @@ After doing this, you may fix the identity used for this commit with:
 
 Thu Dec  5 15:03:07 EST 2019
 Camryn
+[camryn 41b3b2e] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-25-45-85.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 3 files changed, 49 insertions(+), 48 deletions(-)
+ create mode 100644 AirQuality.pdf
