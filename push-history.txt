@@ -377,6 +377,7 @@ After doing this, you may fix the identity used for this commit with:
 
  2 files changed, 42 insertions(+), 14 deletions(-)
 
+<<<<<<< HEAD
 Tue Dec  3 18:47:52 EST 2019
 anna
 [anna 8ef3a62] Automatically making commit for anna
@@ -387,6 +388,19 @@ You can suppress this message by setting them explicitly:
 
     git config --global user.name "Your Name"
     git config --global user.email you@example.com
+=======
+Tue Dec  3 18:54:52 EST 2019
+c
+[camryn 35b6a2e] Automatically making commit for c
+ Committer: Camryn Burley <camrynburley@d-172-25-45-242.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+>>>>>>> camryn
 
 After doing this, you may fix the identity used for this commit with:
 
@@ -394,6 +408,7 @@ After doing this, you may fix the identity used for this commit with:
 
  1 file changed, 3 insertions(+)
 
+<<<<<<< HEAD
 Tue Dec  3 18:49:56 EST 2019
 anna
 [anna b1b0018] Automatically making commit for anna
@@ -404,6 +419,19 @@ You can suppress this message by setting them explicitly:
 
     git config --global user.name "Your Name"
     git config --global user.email you@example.com
+=======
+Wed Dec  4 18:12:37 EST 2019
+Camryn
+[camryn 8d29ffc] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-25-123-156.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+>>>>>>> camryn
 
 After doing this, you may fix the identity used for this commit with:
 
@@ -411,6 +439,7 @@ After doing this, you may fix the identity used for this commit with:
 
  1 file changed, 3 insertions(+)
 
+<<<<<<< HEAD
 Tue Dec  3 18:50:36 EST 2019
 anna
 [anna 93e4694] Automatically making commit for anna
@@ -421,11 +450,25 @@ You can suppress this message by setting them explicitly:
 
     git config --global user.name "Your Name"
     git config --global user.email you@example.com
+=======
+Wed Dec  4 18:34:45 EST 2019
+Camryn
+[camryn 20050ed] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-25-123-156.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+>>>>>>> camryn
 
 After doing this, you may fix the identity used for this commit with:
 
     git commit --amend --reset-author
 
+<<<<<<< HEAD
  2 files changed, 3 insertions(+)
  delete mode 100644 anna.txt
 
@@ -439,9 +482,100 @@ You can suppress this message by setting them explicitly:
 
     git config --global user.name "Your Name"
     git config --global user.email you@example.com
+=======
+ 2 files changed, 27 insertions(+), 32 deletions(-)
+
+Wed Dec  4 19:50:48 EST 2019
+Camryn
+[camryn 9e802fa] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-26-14-163.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+>>>>>>> camryn
 
 After doing this, you may fix the identity used for this commit with:
 
     git commit --amend --reset-author
 
+<<<<<<< HEAD
  2 files changed, 7 insertions(+), 1 deletion(-)
+=======
+ 1 file changed, 3 insertions(+)
+
+Wed Dec  4 23:13:56 EST 2019
+Camryn
+[camryn 7fbd286] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-26-14-163.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 317 insertions(+), 218 deletions(-)
+
+Thu Dec  5 11:43:19 EST 2019
+Camryn
+[camryn e24ee07] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-25-45-85.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 3 insertions(+)
+
+Thu Dec  5 12:21:45 EST 2019
+Camryn
+[camryn 01776de] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-25-45-85.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 43 insertions(+), 84 deletions(-)
+
+Thu Dec  5 12:32:16 EST 2019
+Camryn
+[camryn 3b8607b] Automatically making commit for Camryn
+ Committer: Camryn Burley <camrynburley@d-172-25-45-85.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly. Run the
+following command and follow the instructions in your editor to edit
+your configuration file:
+
+    git config --global --edit
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 51 insertions(+)
+>>>>>>> camryn

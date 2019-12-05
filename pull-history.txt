@@ -39,6 +39,7 @@ Tue, Dec 3, 2019 5:34:22 PM
 Joseph testing
 Already up to date.
 
+<<<<<<< HEAD
 Tue Dec  3 18:47:52 EST 2019
 anna
 Already up to date.
@@ -46,3 +47,20 @@ Already up to date.
 Wed Dec  4 15:11:16 EST 2019
 Anna
 Already up to date.
+=======
+Tue Dec  3 18:54:52 EST 2019
+c
+Already up-to-date.
+
+Wed Dec  4 18:12:37 EST 2019
+Camryn
+Already up-to-date.
+
+Wed Dec  4 19:50:48 EST 2019
+Camryn
+Already up-to-date.
+
+Thu Dec  5 11:43:19 EST 2019
+Camryn
+Already up-to-date.
+>>>>>>> camryn
