@@ -75,6 +75,7 @@ AQdata <- i$filled.dataset
 dailyAQ <- aggregate(AQdata, by=list(as.Date(airquality[,1],"%m/%d/%Y")), FUN=max)
 ```
 
+\pagebreak
 # Create Testing and Training Data
 ```{r}
 # the index to split the data on
@@ -100,6 +101,7 @@ summary(air.train)
 ```
 The data is from March 2004 through April 2005. We are modeling the ambient daily maximum carbon monoxide (CO) and nitrogen dioxide (NO2) concentrations. 
 
+\pagebreak
 # Univariate Time Series for CO
 ## Visualize the Data
 ```{r}
@@ -107,10 +109,11 @@ The data is from March 2004 through April 2005. We are modeling the ambient dail
 CO.ts <- ts(air.train$CO.GT.)
 
 # visualize raw data
-plot(CO.ts)
+plot(CO.ts, main = "CO Time Series")
 ```
 There appears to be some trend from looking at the plot of the time series (i.e. the mean is not constant for the whole time series). There may be some seasonality, but we are unsure as of now if this fluctuation is from seasonality or if it is random.
 
+\pagebreak
 ```{r}
 # periodogram
 pg.CO <- spec.pgram(CO.ts,spans=9,demean=T,log='no')
@@ -153,6 +156,7 @@ plot(sorted.Ts[1:CO.pg.cutoff], main = "Top Periods")
 We found the frequencies of the largest spikes in the periodogram graph and converted them to periods by taking 1/the frequency. The five largest spikes correspond to periods of 384, 192, 128, 96, and 76.8 days. We considered these our "top" choices for periods to explain seasonality.  
 We are concerned that the reason we are seeing a period of 384 days is because this is close to the length of the data set and not because there is actual correlation between data values collected 384 days apart. We will investigate whether or not to use this period in the following sections.
 
+\pagebreak
 ### Create Model with Potential Periods
 To begin, we made a model without the 384 day period but that included the other four periods.
 ```{r}
@@ -222,19 +226,21 @@ anova(CO.lm.top4, CO.lm.top5)
 ```
 We created a model that used all five periods identified from the periodogram. We compared it to the model without the 384-day period using a partial F test. The test is significant at the 0.05 level, which means there is significant evidence to use the larger model. We will use the model with all five periods to explain seasonality in further analysis.
 
+\pagebreak
 ### Visual Inspection of Model
 ```{r}
-plot(CO.ts)
+plot(CO.ts, main = "Model with 5 Periods")
 lines(CO.lm.top5$fitted.values, col = "red")
 
-plot(CO.ts, xlim=c(0,100))
+plot(CO.ts, xlim=c(0,100), main = "Model with 5 Periods (zoomed)")
 lines(CO.lm.top5$fitted.values, col = "red")
 
-plot(CO.ts, xlim=c(100,200))
+plot(CO.ts, xlim=c(100,200), main = "Model with 5 Periods (zoomed)")
 lines(CO.lm.top5$fitted.values, col = "red")
 ```
 We plotted the fitted values of the model in red over the graph of the time series data. We plotted the entire time series and also zoomed in to see t = [0, 100] and t = [100, 200]. The model follows the general trend of the data, but there are no small fluctuations, of which the data has many. We may need to add a term with a smaller period in order to capture these smaller fluctuations.
 
+\pagebreak
 ### Explore Adding Higher Frequency Components
 ```{r}
 # visual for frequency
@@ -249,6 +255,7 @@ next.low.period
 ```
 The average of the periods associated with the next five highest spikes of the periodogram is about 7 days (7.11). A period of around 7 days makes sense to us, as CO production could vary weekly from people working and commuting.
 
+\pagebreak
 ### Add New Period to Model
 We made a new model with all five periods in our previous model with the addition of the new period of around 7 days.
 ```{r}
@@ -272,13 +279,13 @@ CO.lm.top6 <- lm(CO.ts ~ sin(2*pi*time.CO/CO.p1) +
 summary(CO.lm.top6)
 
 # visual inspection
-plot(CO.ts)
+plot(CO.ts, main = "Model with 6 Periods")
 lines(CO.lm.top6$fitted.values, col = "red")
 
-plot(CO.ts, xlim=c(0,100))
+plot(CO.ts, xlim=c(0,100), main = "Model with 6 Periods (zoomed)")
 lines(CO.lm.top6$fitted.values, col = "red")
 
-plot(CO.ts, xlim=c(100,200))
+plot(CO.ts, xlim=c(100,200), main = "Model with 6 Periods (zoomed)")
 lines(CO.lm.top6$fitted.values, col = "red")
 ```
 Upon visually inspecting this new model, we see smaller fluctuations, which we wanted. However, we do see that the peaks of the smaller waves do not consistently match up with where the data has a peak, based on the zoomed in graphs.  
@@ -297,11 +304,12 @@ The p-value is 0.00097, so there is a significant trend in the data.
 
 ### Visualize Trend
 ```{r}
-plot(CO.ts)
+plot(CO.ts, main = "Trend")
 abline(CO.lm.trend, col='red')
 ```
 This graph shows the trendline plotted in red over the time series.
 
+\pagebreak
 ### Model Comparison: Trend and Seasonality Together
 ```{r}
 # model with trend and 5 periods
@@ -334,20 +342,21 @@ anova(CO.seasonal5.trend, CO.seasonal6.trend)
 ```
 The p-value of the partial F test is large (not significant at the 0.05 level), which means that the smaller model is preferred. Based on this test, we would choose the model with trend and five periods.
 
+\pagebreak
 #### Visual Comparison
 ```{r}
 model1 <- CO.seasonal5.trend
-plot(CO.ts)
+plot(CO.ts, main = "Model with Trend and 5 Periods")
 lines(model1$fitted.values, col = "red")
 
-plot(CO.ts, xlim=c(0,100))
+plot(CO.ts, xlim=c(0,100), main = "Model with Trend and 5 Periods (zoomed)")
 lines(model1$fitted.values, col = "red")
 
 model2 <- CO.seasonal6.trend
-plot(CO.ts)
+plot(CO.ts, main = "Model with Trend and 6 Periods")
 lines(model2$fitted.values, col = "red")
 
-plot(CO.ts, xlim=c(0,100))
+plot(CO.ts, xlim=c(0,100), main = "Model with Trend and 6 Periods (zoomed)")
 lines(model2$fitted.values, col = "red")
 ```
 Based on visual inspection, both models capture the overall trend of the data well. The model with trend and six periods has smaller fluctuations, instead of being a smooth curve like the other model, which visually appears to look more similar to the time series. Again, we see that the peaks of the model do not always occur at the same time value as the peaks of the data. 
@@ -417,6 +426,7 @@ CO.lm <- CO.seasonal5.trend
 ```
 Since both models performed similarly in metrics and diagnostics, we have chosen to use the model with the trend and top five identified periods to explain seasonality. It was preferred from the partial F test, and we feel that it is better to choose the simpler model since the two models have such similar performance in metrics and diagnostics.
 
+\pagebreak
 ## Model Residuals
 ### ACF and PACF
 ```{r}
@@ -429,6 +439,7 @@ Based on the PACF, a potential value for p for the autoregressive portion of the
 Based on the ACF, a potential value for q for the moving average portion of the model is 3. We will also test values of 1 and 2 for q, since they are the other significant lags before the first cutoff in the ACF.  
 Additionally, we are unsure of the stationarity of the data, as we know there is a trend and the ACF appears to have some linear decay at the very beginning. This is a key assumption that must be met, so we will test models using the time series itself (d = 0) and the first differences (d = 1).  
 
+\pagebreak
 ### ARIMA Models
 We tested the possible combinations of our p, d, and q values.
 ```{r}
@@ -509,6 +520,7 @@ summary(CO.residuals.auto)
 ```
 The ARIMA model is a 2,0,0 model. This means that there are autoregressive and moving average terms, where p = 2 and q = 2. Also, d = 0, meaning that the first differences were not needed to ensure stationarity, which is a key assumption to modeling the residuals. The AIC for this model is 1435.28.
 
+\pagebreak
 ### Diagnostics
 ```{r}
 tsdiag(CO.arima201, gof.lag = 20)
@@ -542,12 +554,14 @@ plot(NO.ts)
 ```
 There appears to be an increasing trend, especially after about t = 150. There is also the potential for seasonality, but this fluctuation could instead be random.
 
+\pagebreak
 ```{r}
 # periodogram
 pg.NO <- spec.pgram(NO.ts, spans = 9, demean = T, log = 'no')
 ```
 Based on the periodogram, there are multiple possibilities for the period of a seasonal component. There are fewer spikes than the periodogram for CO. There are still spikes, though, each of which indicate a possible frequency/period to explain the seasonality of the data. We predict that if seasonality is significant in the model, it will be based on a complex wave.
 
+\pagebreak
 ## Seasonality
 ### Finding Potential Periods
 ```{r}
@@ -583,6 +597,7 @@ print(NO.pg.box.mean)
 We found the frequencies of the largest spikes in the periodogram graph and converted them to periods by taking 1/the frequency. The 15 largest spikes corresponded to periods ranging from 6.62 to 384 days. We considered these our "top" choices for periods to explain seasonality.  
 The average influential period can be interpreted as on average, the seasons have a period of 48 days.
 
+\pagebreak
 ### Create Models with Potential Periods
 We created models with the top 3, 5, 10, and 15 periods, to determine which was best to explain the seasonality of the data. We did this because we predicted that the seasonality would be based on a complex wave, and we wanted to know how many different periods would be advantageous (i.e. explain more variance) in a model.  
 We also created a model that used a period that was the average of several other periods that were close together. We noticed that top periods 8 through 11 were in the range of 34 to 48. We noticed that top periods 12 through 15 were all close to 7. We thought that since these sets of periods were clustered together, potentially their average would be better at explaining the variance in the model instead of adding separate predictors for each similar period.
@@ -735,9 +750,10 @@ anova(NO.lm.top10, NO.lm.combined)
 ```
 The partial F tests suggest that the model that includes the top 10 periods is better than the models with 3, 5, and 15 periods. The partial F test also suggests that the model with the averaged periods is better than the model with the top 10 periods. Both the model with 10 periods and the model with averaged periods will be further compared through metrics and diagnostics later, after we determine if there is a significant trend to be included.
 
+\pagebreak
 ```{r}
 # visualize
-plot(NO.ts)
+plot(NO.ts, main = "Comparison of Trend and Seasonal Models")
 lines(NO.lm.top10$fitted.values, col = "red")
 lines(NO.lm.combined$fitted.values, col = "blue")
 
@@ -758,11 +774,12 @@ The p-value is significant at the 0.05 level, which means that the trend is sign
 
 ### Visualize Trend
 ```{r}
-plot(time.NO, NO.ts, type = "l")
+plot(time.NO, NO.ts, type = "l", main = "Trend")
 abline(NO.lm.trend, col = "red")
 ```
 As we noticed earlier from looking at the time series, there is an upward trend to the data.
 
+\pagebreak
 ### Model Comparison: Trend and Seasonality Together
 ```{r}
 # model with trend + averaged periods
@@ -808,12 +825,14 @@ NO.seasonal10.trend <- lm(NO.ts ~ time.NO + sin(2*pi*time.NO/NO.p1) +
                          cos(2*pi*time.NO/NO.p10))
 ```
 
+\pagebreak
 #### Visual Comparison
 ```{r}
-plot(NO.ts)
+plot(NO.ts, main = "Comparison of Models with Trend and Seasonality")
 lines(NO.seasonalavg.trend$fitted.values, col = "blue")
 lines(NO.seasonal10.trend$fitted.values, col = "red")
-legend(0, 350, legend = c("Top 10 Periods", "Averaged Periods"), col = c("red", "blue"), lwd = 1)
+legend(0, 350, legend = c("Top 10 Periods", "Averaged Periods"), col = c("red", "blue"),
+       lwd = 1)
 ```
 Based on visual inspection, the model with trend and averaged periods appears to better capture the fluctuations of the data, though both models match the general trend of the data.
 
@@ -882,6 +901,7 @@ NO.lm <- NO.seasonalavg.trend
 ```
 We have chosen the model with the trend and averaged periods to explain seasonality, as it performed slightly better in AIC than the model with trend and 10 periods, as well as being preferred after the partial F test. Since the diagnostics for both models were similar, AIC and the partial F test were used to make the decision. Though not a deciding factor in our choice, this model also has the advantage of having somewhat more normal residuals in the tails of the QQ plot.
 
+\pagebreak
 ## Model Residuals
 ### ACF and PACF
 ```{r}
@@ -895,6 +915,7 @@ The PACF does not cut off after a certain number of lags and also has somewhat s
 Based on the PACF, a potential value for p for the autoregressive portion of the model is 3. We will also test values of 1 and 2 for p, since they are the other significant lags before the first cutoff in the PACF.  
 Based on the ACF, a potential value for q for the moving average portion of the model is 4. This is the point where the ACF stops decreasing, before increasing again, for the first time. Values of 1, 2, and 3 will also be tested for q, as these lags are also significant before the lag of 4.  
 
+\pagebreak
 ### ARIMA Models
 We tested the possible combinations of our p, d, and q values.
 ```{r}
@@ -1058,8 +1079,6 @@ In the diagnostic plot for the model of the residuals, the p-value for the Ljung
 
 
 \pagebreak
-#### Multivariate Time Series
-=======
 # Multivariate Time Series
 ## Seasonality and Trends
 We used the same linear models for the seasonality and trends that we discovered in our analysis of the univariate time series for CO and NO2. See above for how we modeled seasonal components and trends to produce these linear models.  
@@ -1102,6 +1121,7 @@ We did not include the chunk that actually ran the code to test the VARMA models
 # }
 ```
 
+\pagebreak
 ## Model Comparison
 ### Metrics
 ```{r}
@@ -1142,6 +1162,7 @@ The final model was chosen as the VARMA(2,2) model, because it has the lowest AI
 The model is adequate for up to 11 lags, based on the diagnostic plot. Future work could attempt to produce a model adequate for more lags, but we feel that this is acceptable performance from the model we have chosen.
 
 
+\pagebreak
 # Simulation from Univariate CO Model
 ```{r}
 # CO ARIMA model is 2,0,1
@@ -1158,13 +1179,15 @@ next.time.time <- c(1:(365))
 next.time <- data.frame(time.CO = next.time.time)
 
 CO.mean <- predict(CO.lm, newdata = next.time)
-plot(CO.uni.sim + CO.mean)
 
 # make time series
 CO.uni.sim.ts <- ts(CO.uni.sim + CO.mean)
+
+plot(CO.uni.sim + CO.mean, main = "CO Univariate Simulation")
 ```
 This is the plot of the simulation.
 
+\pagebreak
 ## Visualization
 ```{r}
 # plot simulated values with observations
@@ -1183,6 +1206,7 @@ summary(CO.lm.trend)
 ```
 We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. The model was significant, meaning that there is a trend to the simulation. The estimated coefficient value was 0.0032 for the simulation and 0.0029 for the original time series. These coefficients are very close, so the simulation was able to accurately reproduce the trend of the original time series. 
 
+\pagebreak
 ## Seasonality
 ```{r}
 # compare periodogram of observations and periodogram of simulation
@@ -1193,6 +1217,7 @@ par(mfrow = c(1,1))
 ```
 The periodograms of the original observations and simulation look similar. They have similar peak locations and magnitudes, especially at the lower end of the frequencies. The simulation was able to closely reproduce the seasonality of the time series.
 
+\pagebreak
 ## Mean and Variance
 ```{r}
 # mean of observations
@@ -1220,6 +1245,7 @@ acf(CO.uni.sim.ts)
 ```
 The simulation got close to reproducing the ACF of the time series. They both cutoff and become significant again and show somewhat sinusoidal behavior.
 
+\pagebreak
 ```{r}
 # PACF of observations
 pacf(CO.ts)
@@ -1232,6 +1258,7 @@ The ACFs look more similar, though the PACF of the time series and simulation ar
 From comparing the ACF and PACF of the time series and simulation, the simulation was able to reproduce the autocorrelation of the time series.
 
 
+\pagebreak
 # Simulation from Univariate NO2 Model
 ```{r}
 # NO2 ARIMA model is 1,0,4
@@ -1249,13 +1276,15 @@ NO.uni.sim <- arima.sim(n = 365, list(ar = c(NO.residuals$coef[1]),
 next.time.NO <- data.frame(time.NO = next.time.time)
 
 NO.mean <- predict(NO.lm, newdata = next.time.NO)
-plot(NO.uni.sim + NO.mean)
 
 # make time series
 NO.uni.sim.ts <- ts(NO.uni.sim + NO.mean)
+
+plot(NO.uni.sim + NO.mean, main = "NO2 Univariate Simulation")
 ```
 This is the plot of the simulation.
 
+\pagebreak
 ## Visualization
 ```{r}
 # plot simulated values with observations
@@ -1274,6 +1303,7 @@ summary(NO.lm.trend)
 ```
 We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. The model was significant, meaning that there is a trend to the simulation. The estimated coefficient value was 0.262 for the simulation and 0.256 for the original time series. These coefficients are very close, so the simulation was able to accurately reproduce the trend of the original time series. 
 
+\pagebreak
 ## Seasonality
 ```{r}
 # compare periodogram of observations and periodogram of simulation
@@ -1284,6 +1314,7 @@ par(mfrow = c(1,1))
 ```
 The periodograms of the original observations and simulation look similar, but the periodogram for the simulation appears to have different peaks in the frequency range of 0.05 to 0.2. The simulation was able to somewhat closely reproduce the seasonality of the time series.
 
+\pagebreak
 ## Mean and Variance
 ```{r}
 # mean of observations
@@ -1311,6 +1342,7 @@ acf(NO.uni.sim.ts)
 ```
 The ACFs look very similar; they are both significant for all 25 lags in view on the plot and have some sinusoidal behavior. 
 
+\pagebreak
 ```{r}
 # PACF of observations
 pacf(CO.ts)
@@ -1323,6 +1355,7 @@ The ACFs look more similar, though the PACF of the time series and simulation ar
 From comparing the ACF and PACF of the time series and simulation, the simulation was able to reproduce the autocorrelation of the time series.
 
 
+\pagebreak
 # Simulation from Multivariate Model
 ```{r}
 # VARMA model is 2,2
@@ -1336,11 +1369,12 @@ multi.sim <- VARMAsim(365, phi = varma.model$Phi,
 # make time series
 multi.sim.CO.ts <- ts(multi.sim$series[,1] + CO.mean)
 multi.sim.NO.ts <- ts(multi.sim$series[,2] + NO.mean)
-plot(multi.sim.CO.ts, main = "CO")
-plot(multi.sim.NO.ts, main = "NO2")
+plot(multi.sim.CO.ts, main = "CO Multivariate Simulation")
+plot(multi.sim.NO.ts, main = "NO2 Multivariate Simulation")
 ```
 These are the plots of the simulations.
 
+\pagebreak
 ## Visualization- CO
 ```{r}
 # plot simulated values with observations
@@ -1350,6 +1384,7 @@ legend(0, 12.5, legend = c("Time Series Data", "Simulation"), col = c("black", "
 ```
 The simulation values appear to be similar to the time series data.
 
+\pagebreak
 ## Visualization- NO2
 ```{r}
 # plot simulated values with observations
@@ -1377,6 +1412,7 @@ summary(NO.lm.trend)
 ```
 We made a linear model for the simulation with time as a predictor to determine if there was a trend to the data. The model was significant, meaning that there is a trend to the simulation. The estimated coefficient value was 0.255 for the simulation and 0.256 for the original time series. These coefficients are very close, so the simulation was able to accurately reproduce the trend of the original time series. 
 
+\pagebreak
 ## Seasonality- CO
 ```{r}
 # compare periodogram of observations and periodogram of simulation
@@ -1387,6 +1423,7 @@ par(mfrow = c(1,1))
 ```
 The periodograms of the original observations and simulation are not very similar. There are fewer peaks in the simulation periodogram.
 
+\pagebreak
 ## Seasonality- NO2
 ```{r}
 # compare periodogram of observations and periodogram of simulation
@@ -1397,6 +1434,7 @@ par(mfrow = c(1,1))
 ```
 The periodograms of the original observations and simulation are similar. There are similar peaks in similar locations in both periodograms.
 
+\pagebreak
 ## Mean and Variance
 ```{r}
 # mean of observations- CO
@@ -1429,6 +1467,7 @@ The variance of the original time series is 3.62, and the variance of the simula
 **NO2: **The mean of the original time series is 164.53, and the mean of the simulation is 160.64. The means are close together, which was apparent from the plot of both the time series and simulation together.  
 The variance of the original time series is 2657.722, and the variance of the simulation is 2499.248. The variances are also similar.
 
+\pagebreak
 ## Auto-Correlation- CO
 ```{r}
 # ACF of observations
@@ -1439,6 +1478,7 @@ acf(multi.sim.CO.ts)
 ```
 The simulation got close to reproducing the ACF of the time series, though the ACF of the simulation is significant for all of the lags in view and the ACF of the time series cuts off and becomes significant again. Both have some sinusoidal behavior.
 
+\pagebreak
 ```{r}
 # PACF of observations
 pacf(CO.ts)
@@ -1450,6 +1490,7 @@ The PACF of the simulation does not match the PACF of the time series. The PACF 
 
 From comparing the ACF and PACF of the time series and simulation, the simulation was somewhat able to reproduce the autocorrelation of the time series.
 
+\pagebreak
 ## Auto-Correlation- NO2
 ```{r}
 # ACF of observations
@@ -1460,6 +1501,7 @@ acf(multi.sim.NO.ts)
 ```
 The simulation got very close to reproducing the ACF of the time series. They both are significant for all lags in view on the plot and display some sinusoidal behavior.
 
+\pagebreak
 ```{r}
 # PACF of observations
 pacf(NO.ts)
@@ -1471,6 +1513,7 @@ The ACFs look more similar. The PACF shows more significance at the smaller lags
 
 From comparing the ACF and PACF of the time series and simulation, the simulation was somewhat able to reproduce the autocorrelation of the time series.
 
+\pagebreak
 # Cross-Correlation
 ## Cross-Correlation of Time Series
 ```{r}
@@ -1491,8 +1534,8 @@ cor(multi.sim.CO.ts, multi.sim.NO.ts)
 ```
 The cross-correlation for the original time series is 0.608. The cross-correlation for the univariate models is much lower, at 0.126. The cross-correlation for the multivariate models is 0.560, which is closer to the original value. Using a multivariate model better preserved the correlation between the time series.
 
-# Bonus 
-## Create Forecasts
+\pagebreak
+# Bonus: Forecasting
 ### Forecast for CO 
 ```{r}
 nextweek.time.time <- c(1:(7))
@@ -1526,6 +1569,7 @@ e_t.pred.NO.upper <- CO.NO.forecast$pred[,2] + 1.96*CO.NO.forecast$se.err[,2]
 NO.multi.forecast <- E_Y.pred.NO + e_t.pred.NO.multi
 ```
 
+\pagebreak
 ## Comparison based on MSE 
 ```{r}
 #CO MSE
@@ -1544,6 +1588,7 @@ mean((NO.multi.forecast-air.test$NO2.GT.)^2)
 ```
 The MSE for the CO forecast from the univariate model is higher than that from the multivariate model which implies that the multivariate model models the residuals of CO better. Conversely, the MSE for the univariate model for NO2 is smaller than that from the multivariate model which implies that the univariate model does a better job of modeling the residuals of NO2. Despite all this, the MSE between the univariate and multivariate models are very close. 
 
+\pagebreak
 ## Visual Comparison
 ### Forecast from CO Univariate Model
 ```{r}
@@ -1557,6 +1602,7 @@ legend(2,2, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
 ```
 The predicted values are higher than the actual values for all but one point. There are two actual values that lie outside of the confidence interval of the prediction.
 
+\pagebreak
 ### Forecast from NO2 Univariate Model
 ```{r}
 # Plot actual values and predicted values
@@ -1568,6 +1614,7 @@ legend(2,107, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"
 ```
 All of the actual values are within the bounds of the confidence interval of the predictions. The actual valyes are higher than the predictions for 5 out of the 7 points.
 
+\pagebreak
 ### Forecast from Multivariate Model 
 ```{r}
 # CO forecasts
@@ -1576,7 +1623,9 @@ lines(ts(CO.multi.forecast),col='red',type='o')
 lines(1:7, E_Y.pred.CO + e_t.pred.CO.lower, col = "red", lty = "dashed")
 lines(1:7, E_Y.pred.CO + e_t.pred.CO.upper, col = "red", lty = "dashed")
 legend(2,2, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"))
-
+```
+\pagebreak
+```{r}
 #NO forecasts
 plot(ts(air.test$NO2.GT.),type='o',ylim = c(50,275),main = "NO2 Forecast")
 lines(ts(NO.multi.forecast),col='red',type='o')
