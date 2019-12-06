@@ -4,10 +4,11 @@ author: "Camryn Burley, Anna Haikl, and Joseph Keogh"
 date: "12-4-19"
 abstract: "On our honor as students, we have neither given nor received aid on this assignment."
 output:
-  pdf_document: default
+  html_document: default
 ---
 
-```{r setup, include = FALSE}
+```{r, include = FALSE}
+#{r setup, include = FALSE}
 #Anna's Setup
 
 # require("knitr")
@@ -19,7 +20,8 @@ output:
 # library(MTS)
 ```
 
-```{r setup, include = FALSE}
+```{r, include=FALSE}
+#{r setup, include = FALSE}
 # # Camryn Set Up
 # require("knitr")
 # datadir <- "/Users/camrynburley/Desktop/UVA/SYS4021/Data/AirQuality"
