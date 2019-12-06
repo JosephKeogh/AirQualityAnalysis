@@ -9,30 +9,30 @@ output:
 ---
 
 ```{r setup, include = FALSE}
-#=======
-#Anna's Setup
-#=======
-require("knitr")
-datadir <- "/Users/annahaikl/Desktop/UVA/FALL 2019/4021/DATA/Air Quality"
-sourcedir <-"/Users/annahaikl/Desktop/UVA/FALL 2019/4021/CODE"
-opts_knit$set(root.dir = sourcedir)
-library(forecast)
-library(mtsdi)
-library(MTS)
+# #=======
+# #Anna's Setup
+# #=======
+# require("knitr")
+# datadir <- "/Users/annahaikl/Desktop/UVA/FALL 2019/4021/DATA/Air Quality"
+# sourcedir <-"/Users/annahaikl/Desktop/UVA/FALL 2019/4021/CODE"
+# opts_knit$set(root.dir = sourcedir)
+# library(forecast)
+# library(mtsdi)
+# library(MTS)
 ```
 
 ```{r setup, include = FALSE}
-# Camryn Set Up
-require("knitr")
-datadir <- "/Users/camrynburley/Desktop/UVA/SYS4021/Data/AirQuality"
-sourcedir <- "/Users/camrynburley/Desktop/UVA/SYS4021/RCode"
-opts_knit$set(root.dir = sourcedir)
-library(forecast)
-library(mtsdi)
-library(MTS)
+# # Camryn Set Up
+# require("knitr")
+# datadir <- "/Users/camrynburley/Desktop/UVA/SYS4021/Data/AirQuality"
+# sourcedir <- "/Users/camrynburley/Desktop/UVA/SYS4021/RCode"
+# opts_knit$set(root.dir = sourcedir)
+# library(forecast)
+# library(mtsdi)
+# library(MTS)
 ```
 
-```{r setup, include = FALSE}
+```{r}
 # Joey Set Up
 require("knitr")
 datadir <- "C:/Users/JK/Google Drive/Acedemics/College/Fourth Year/Semester 7/Linear Statistical Models/Data/AirQualityData"
@@ -521,9 +521,6 @@ Both the (2,0,1) and (2,1,2) models perform similarly in the diagnostic plot, th
 
 ### Choose Model for Residuals
 ```{r}
-CO.residuals <- CO.arima719
-CO.residuals <- CO.residuals.auto
-
 summary(CO.residuals)
 CO.residuals <- CO.arima201
 ```
@@ -565,11 +562,10 @@ e.Tmin.lm <- CO.residuals
 e.CO.sim <- arima.sim(n=365, 
                       list(
                             ar=c(
-                                e.Tmin.lm$coef[1],e.Tmin.lm$coef[2],e.Tmin.lm$coef[3],
-                                e.Tmin.lm$coef[4],e.Tmin.lm$coef[5]
+                                e.Tmin.lm$coef[1],e.Tmin.lm$coef[2]
                               ), 
                             ma=c(
-                              e.Tmin.lm$coef[6],e.Tmin.lm$coef[7]
+                              e.Tmin.lm$coef[3]
                               )
                           )
                         )
@@ -1160,52 +1156,17 @@ The ARMA models for the residuals of both time series use d = 0, meaning that bo
 In our univariate models, the residuals for CO were modeled with an ARIMA(2,0,1) model and the residuals for NO2 were modeled with an ARIMA(1,0,4) model. There were autoregressive and moving average terms in both cases. Since there were different p and q values used to model the residuals for each time series, it is difficult to use the ACF and PACF to determine values for p and q for the multivariate model. Because of this, we will test models with p from 1 to 2 and q from 0 to 4 to determine the best VARMA model.
 
 ## Models
-```{r, include = FALSE}
+
+
+
+
+# p from 4 to 7, q from 9 to 11
+```{r}
 # all residuals together
 allResiduals <- data.frame(CO.lm$residuals, NO.lm$residuals)
 
 # Build VARMA models
 
-# p from 1 to 3, q from 0 to 7
-AICmatrix1 <- matrix(NA, 3, 8)
-for(p in 1:3) {
-  for(q in 0:7) {
-    varma.model1 <- VARMACpp(allResiduals, p=p, q=q, include.mean=F, details = F)
-    AICmatrix1[p,q+1] <- varma.model1$aic
-  }
-}
-```
-
-# p from 1 to 3, q from 9 to 11
-```{r}
-AICmatrix2 <- matrix(NA, 3, 3)
-for(p in 1:3) {
-  for(q in 9:11) {
-    varma.model2 <- VARMACpp(allResiduals, p=p, q=q, include.mean=F, details = F)
-    AICmatrix2[p,q+1] <- varma.model2$aic
-  }
-}
-```
-
-# p from 4 to 7, q from 0 to 8
-```{r}
-AICmatrix3 <- matrix(NA, 4, 9)
-for(p in 4:7) {
-  for(q in 0:8) {
-    varma.model3 <- VARMACpp(allResiduals, p=p, q=q, include.mean=F, details = F)
-    AICmatrix3[p,q+1] <- varma.model3$aic
-  }
-}
-```
-
-# p from 4 to 7, q from 9 to 11
-```{r}
-AICmatrix4 <- matrix(NA, 4, 3)
-for(p in 4:7) {
-  for(q in 9:11) {
-    varma.model4 <- VARMACpp(allResiduals, p=p, q=q, include.mean=F, details = F)
-    AICmatrix4[p,q+1] <- varma.model4$aic
-=======
 # p from 1 to 2, q from 0 to 4
 AICmatrix <- matrix(NA, 2, 5)
 for(p in 1:2) {
@@ -1216,31 +1177,7 @@ for(p in 1:2) {
 }
 ```
 
-```{r}
-AICmatrix1
-lowest.1 <- which(AICmatrix1 == min (AICmatrix1), arr.ind = TRUE)
-AICmatrix2
-lowest.2 <- which(AICmatrix2 == min (AICmatrix2), arr.ind = TRUE)
-AICmatrix3
-lowest.3 <- which(AICmatrix3 == min (AICmatrix3), arr.ind = TRUE)
-AICmatrix4
-lowest.4 <- which(AICmatrix4 == min (AICmatrix4), arr.ind = TRUE)
-We did not include the chunk that actually ran the code to test the VARMA models, so that it would not print the output for every model. The commented code below is the code we ran.
-```{r}
-# # all residuals together
-# allResiduals <- data.frame(CO.lm$residuals, NO.lm$residuals)
-# 
-# # Build VARMA models
-# 
-# # p from 1 to 2, q from 0 to 4
-# AICmatrix <- matrix(NA, 2, 5)
-# for(p in 1:2) {
-#   for(q in 0:4) {
-#     varma.model <- VARMACpp(allResiduals, p=p, q=q, include.mean=F)
-#     AICmatrix[p,q+1] <- varma.model$aic
-#   }
-# }
-```
+
 
 ## Model Comparison
 ### Metrics
@@ -1300,7 +1237,7 @@ CO.mean <- predict(CO.lm, newdata = next.time)
 plot(CO.uni.sim + CO.mean)
 
 # make time series
-CO.uni.sim.ts <- ts(CO.uni.sim)
+CO.uni.sim.ts <- ts(CO.uni.sim + CO.mean)
 ```
 This is the plot of the simulation.
 
@@ -1485,7 +1422,6 @@ NO.forecast
 
 ## Forecast for CO and NO2 (Multivariate Model)
 ```{r}
-#todo is this right?
 CO.NO.forecast <- VARMApred(CO.NO.residuals, h=7)
 
 e_t.pred.CO.multi <- CO.NO.forecast$pred[,1]
@@ -1501,8 +1437,6 @@ NO.multi.forecast <- E_Y.pred.NO + e_t.pred.NO.multi
 
 ## Comparison based on MSE 
 ```{r}
-#todo find MSE for multivariate, then write to compare
-
 #CO MSE
 mean((CO.forecast-air.test$CO.GT.)^2)
 # MSE = 4.71
@@ -1547,8 +1481,6 @@ legend(2,116, legend = c("Actual", "Predicted"), lwd = 2, col = c("black", "red"
 All of the actual values are within the bounds of the confidence interval of the predictions. The actual valyes are higher than the predictions for 5 out of the 7 points.
 
 ```{r}
-#todo make sure these run, then write about them
-
 #Multi Plot 
 par(mfrow=c(1,2))
 # CO forecasts
