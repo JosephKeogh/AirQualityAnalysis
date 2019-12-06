@@ -58,17 +58,15 @@ After doing this, you may fix the identity used for this commit with:
 
  1 file changed, 3 insertions(+)
 
-<<<<<<< HEAD
 Wed Nov 20 19:33:06 EST 2019
 Anna
 [master 9c32740] Automatically making commit for Anna
  Committer: Anna Haikl <annahaikl@d-172-25-44-14.dhcp.virginia.edu>
-=======
+ 
 Wed Nov 20 17:35:58 EST 2019
 Camryn
 [master 06e06e2] Automatically making commit for Camryn
  Committer: Camryn Burley <camrynburley@d-172-25-45-32.dhcp.virginia.edu>
->>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
 Your name and email address were configured automatically based
 on your username and hostname. Please check that they are accurate.
 You can suppress this message by setting them explicitly. Run the
@@ -81,9 +79,7 @@ After doing this, you may fix the identity used for this commit with:
 
     git commit --amend --reset-author
 
-<<<<<<< HEAD
  2 files changed, 264 insertions(+), 9 deletions(-)
-=======
  1 file changed, 3 insertions(+)
 
 Wed Nov 20 19:25:42 EST 2019
@@ -108,7 +104,6 @@ Wed, Nov 20, 2019  7:32:28 PM
 Joseph Testing Pull Request File
 [master 09dbebd] Automatically making commit for Joseph Testing Pull Request File
  1 file changed, 3 insertions(+)
->>>>>>> 612d638bd48f774931f36b03e39d80ee4e4cc0a5
 
 Wed Nov 20 19:50:53 EST 2019
 Joey testing for anna
@@ -377,6 +372,17 @@ After doing this, you may fix the identity used for this commit with:
 
  2 files changed, 42 insertions(+), 14 deletions(-)
 
+Tue Dec  3 18:47:52 EST 2019
+anna
+[anna 8ef3a62] Automatically making commit for anna
+ Committer: ah8wt <annahaikl@Annas-MacBook-Pro.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
 Tue Dec  3 18:54:52 EST 2019
 c
 [camryn 35b6a2e] Automatically making commit for c
@@ -394,6 +400,17 @@ After doing this, you may fix the identity used for this commit with:
     git commit --amend --reset-author
 
  1 file changed, 3 insertions(+)
+
+Tue Dec  3 18:49:56 EST 2019
+anna
+[anna b1b0018] Automatically making commit for anna
+ Committer: ah8wt <annahaikl@Annas-MacBook-Pro.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
 
 Wed Dec  4 18:12:37 EST 2019
 Camryn
@@ -413,6 +430,17 @@ After doing this, you may fix the identity used for this commit with:
 
  1 file changed, 3 insertions(+)
 
+Tue Dec  3 18:50:36 EST 2019
+anna
+[anna 93e4694] Automatically making commit for anna
+ Committer: ah8wt <annahaikl@Annas-MacBook-Pro.local>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
 Wed Dec  4 18:34:45 EST 2019
 Camryn
 [camryn 20050ed] Automatically making commit for Camryn
@@ -425,11 +453,27 @@ your configuration file:
 
     git config --global --edit
 
+
 After doing this, you may fix the identity used for this commit with:
 
     git commit --amend --reset-author
 
- 2 files changed, 27 insertions(+), 32 deletions(-)
+
+2 files changed, 3 insertions(+)
+ delete mode 100644 anna.txt
+
+Wed Dec  4 15:11:16 EST 2019
+Anna
+[anna 81baf5d] Automatically making commit for Anna
+ Committer: ah8wt <annahaikl@d-172-25-99-209.dhcp.virginia.edu>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+2 files changed, 27 insertions(+), 32 deletions(-)
 
 Wed Dec  4 19:50:48 EST 2019
 Camryn
@@ -443,11 +487,15 @@ your configuration file:
 
     git config --global --edit
 
+
 After doing this, you may fix the identity used for this commit with:
 
     git commit --amend --reset-author
 
- 1 file changed, 3 insertions(+)
+
+2 files changed, 7 insertions(+), 1 deletion(-)
+
+1 file changed, 3 insertions(+)
 
 Wed Dec  4 23:13:56 EST 2019
 Camryn
@@ -521,6 +569,7 @@ After doing this, you may fix the identity used for this commit with:
 
  2 files changed, 51 insertions(+)
 
+
 Thu Dec  5 14:48:01 EST 2019
 Camryn
 [camryn 7658e54] Automatically making commit for Camryn
@@ -593,3 +642,6 @@ After doing this, you may fix the identity used for this commit with:
     git commit --amend --reset-author
 
  3 files changed, 77 insertions(+), 25 deletions(-)
+
+
+
